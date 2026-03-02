@@ -9,7 +9,7 @@
 body{
     margin:0;
     font-family:Segoe UI, sans-serif;
-    background:linear-gradient(135deg,#141E30,#243B55);
+    background:linear-gradient(135deg,#0f2027,#203a43,#2c5364);
     color:white;
     text-align:center;
 }
@@ -18,9 +18,7 @@ body{
     margin:auto;
     padding:20px;
 }
-h1{
-    margin-bottom:5px;
-}
+h1{margin-bottom:5px;}
 .card{
     background:rgba(255,255,255,0.08);
     padding:20px;
@@ -37,17 +35,13 @@ button{
     color:black;
     margin:5px;
 }
-button:hover{
-    background:#00ffcc;
-}
+button:hover{background:#00ffcc;}
 select,input{
     padding:8px;
     border-radius:8px;
     border:none;
 }
-.result{
-    margin-top:20px;
-}
+.result{margin-top:20px;}
 .number{
     display:inline-block;
     background:#ffcc00;
@@ -57,7 +51,7 @@ select,input{
     border-radius:50%;
     min-width:45px;
     font-weight:bold;
-    animation: pop 0.4s ease;
+    animation:pop 0.4s ease;
 }
 .power{
     background:#ff4444;
@@ -71,11 +65,43 @@ select,input{
     max-height:200px;
     overflow:auto;
     font-size:14px;
+    text-align:left;
 }
 .stat{
     margin-top:10px;
     font-size:15px;
     opacity:0.9;
+}
+
+/* Birthday Layout */
+.birthday-wrapper{
+    display:flex;
+    justify-content:center;
+    align-items:flex-end;
+    gap:15px;
+    flex-wrap:wrap;
+    margin-top:15px;
+}
+.birthday-select{
+    display:flex;
+    flex-direction:column;
+    text-align:left;
+}
+.birthday-select label{
+    font-size:13px;
+    margin-bottom:4px;
+    opacity:0.8;
+}
+.birthday-select select{
+    padding:10px;
+    border-radius:8px;
+    background:#1f2f46;
+    color:white;
+    border:1px solid #00c6ff;
+    cursor:pointer;
+}
+.birthday-select select:hover{
+    border-color:#00ffcc;
 }
 </style>
 </head>
@@ -101,19 +127,39 @@ select,input{
 <input type="number" id="setCount" value="1" min="1" max="10">
 <button onclick="generate()">Tạo Số</button>
 
-<br><br>
-
-<input type="date" id="birthday">
-<button onclick="generateByBirthday()">Theo Ngày Sinh</button>
-
 <div class="result" id="result"></div>
-
 <div class="stat" id="stat"></div>
 
 </div>
 
+<!-- Birthday Section -->
 <div class="card">
-<h3>Lịch sử bộ số</h3>
+<h3>🎂 Tạo Số Theo Ngày Sinh</h3>
+
+<div class="birthday-wrapper">
+    <div class="birthday-select">
+        <label>Ngày</label>
+        <select id="day"></select>
+    </div>
+
+    <div class="birthday-select">
+        <label>Tháng</label>
+        <select id="month"></select>
+    </div>
+
+    <div class="birthday-select">
+        <label>Năm</label>
+        <select id="year"></select>
+    </div>
+
+    <button onclick="generateByBirthday()">Tạo Theo Ngày Sinh</button>
+</div>
+
+</div>
+
+<!-- History -->
+<div class="card">
+<h3>📜 Lịch Sử Bộ Số</h3>
 <div class="history" id="history"></div>
 <button onclick="clearHistory()">Xóa Lịch Sử</button>
 </div>
@@ -129,6 +175,25 @@ function randomUnique(count,max){
         if(!arr.includes(num)) arr.push(num);
     }
     return arr.sort((a,b)=>a-b);
+}
+
+function showNumbers(numbers,isCircle=true,isPower=false){
+    let result=document.getElementById("result");
+    numbers.forEach(n=>{
+        if(isCircle){
+            result.innerHTML+=`<div class="number ${isPower?'power':''}">${n}</div>`;
+        }else{
+            result.innerHTML+=`<span style="font-size:22px;margin:5px;">${n}</span>`;
+        }
+    });
+}
+
+function analyze(numbers){
+    let even=numbers.filter(n=>n%2===0).length;
+    let odd=numbers.length-even;
+    let sum=numbers.reduce((a,b)=>a+b,0);
+    document.getElementById("stat").innerHTML=
+        `Chẵn: ${even} | Lẻ: ${odd} | Tổng: ${sum}`;
 }
 
 function saveHistory(data){
@@ -152,27 +217,7 @@ function clearHistory(){
     loadHistory();
 }
 
-function showNumbers(numbers,isCircle=true,isPower=false){
-    let result=document.getElementById("result");
-    numbers.forEach(n=>{
-        if(isCircle){
-            result.innerHTML+=`<div class="number ${isPower?'power':''}">${n}</div>`;
-        }else{
-            result.innerHTML+=`<span style="font-size:22px;margin:5px;">${n}</span>`;
-        }
-    });
-}
-
-function analyze(numbers){
-    let even=numbers.filter(n=>n%2===0).length;
-    let odd=numbers.length-even;
-    let sum=numbers.reduce((a,b)=>a+b,0);
-    document.getElementById("stat").innerHTML=
-        `Chẵn: ${even} | Lẻ: ${odd} | Tổng: ${sum}`;
-}
-
 function generate(){
-
     let game=document.getElementById("game").value;
     let count=parseInt(document.getElementById("setCount").value);
     let result=document.getElementById("result");
@@ -197,6 +242,13 @@ function generate(){
             saveHistory("Power: "+nums.join("-")+" | "+power);
         }
 
+        if(game==="lotto"){
+            let nums=randomUnique(5,35);
+            showNumbers(nums);
+            analyze(nums);
+            saveHistory("Lotto: "+nums.join("-"));
+        }
+
         if(game==="keno"){
             let nums=randomUnique(20,80);
             showNumbers(nums);
@@ -209,30 +261,19 @@ function generate(){
             saveHistory("Bingo: "+nums.join("-"));
         }
 
-        if(game==="lotto"){
-            let nums=randomUnique(5,35);
-            showNumbers(nums);
-            analyze(nums);
-            saveHistory("Lotto: "+nums.join("-"));
-        }
-
         if(game==="max3d"){
-            let nums=[
-                Math.floor(Math.random()*10),
-                Math.floor(Math.random()*10),
-                Math.floor(Math.random()*10)
-            ];
+            let nums=[Math.floor(Math.random()*10),
+                      Math.floor(Math.random()*10),
+                      Math.floor(Math.random()*10)];
             showNumbers(nums,false);
             saveHistory("Max3D: "+nums.join(""));
         }
 
         if(game==="max3dpro"){
             for(let j=0;j<3;j++){
-                let nums=[
-                    Math.floor(Math.random()*10),
-                    Math.floor(Math.random()*10),
-                    Math.floor(Math.random()*10)
-                ];
+                let nums=[Math.floor(Math.random()*10),
+                          Math.floor(Math.random()*10),
+                          Math.floor(Math.random()*10)];
                 showNumbers(nums,false);
                 result.innerHTML+="<br>";
                 saveHistory("Max3DPro: "+nums.join(""));
@@ -244,18 +285,65 @@ function generate(){
 }
 
 function generateByBirthday(){
-    let date=document.getElementById("birthday").value;
-    if(!date){alert("Chọn ngày sinh");return;}
-    let parts=date.split("-");
-    let nums=parts.map(n=>parseInt(n));
+
+    let day=parseInt(document.getElementById("day").value);
+    let month=parseInt(document.getElementById("month").value);
+    let year=parseInt(document.getElementById("year").value);
+
+    if(!day||!month||!year){
+        alert("Vui lòng chọn đầy đủ ngày tháng năm sinh");
+        return;
+    }
+
     let result=document.getElementById("result");
     result.innerHTML="";
-    showNumbers(nums);
-    analyze(nums);
-    saveHistory("Birthday: "+nums.join("-"));
+    document.getElementById("stat").innerHTML="";
+
+    let base=[day,month,year%100];
+
+    while(base.length<6){
+        let num=Math.floor(Math.random()*45)+1;
+        if(!base.includes(num)) base.push(num);
+    }
+
+    base=base.sort((a,b)=>a-b);
+
+    showNumbers(base);
+    analyze(base);
+    saveHistory("Birthday: "+base.join("-"));
+}
+
+function initBirthdaySelectors(){
+
+    let daySelect=document.getElementById("day");
+    let monthSelect=document.getElementById("month");
+    let yearSelect=document.getElementById("year");
+
+    for(let i=1;i<=31;i++){
+        let opt=document.createElement("option");
+        opt.value=i;
+        opt.text=i;
+        daySelect.appendChild(opt);
+    }
+
+    for(let i=1;i<=12;i++){
+        let opt=document.createElement("option");
+        opt.value=i;
+        opt.text=i;
+        monthSelect.appendChild(opt);
+    }
+
+    let currentYear=new Date().getFullYear();
+    for(let i=currentYear;i>=1950;i--){
+        let opt=document.createElement("option");
+        opt.value=i;
+        opt.text=i;
+        yearSelect.appendChild(opt);
+    }
 }
 
 loadHistory();
+initBirthdaySelectors();
 
 </script>
 
