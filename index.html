@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Vietlott AI Predictor PRO</title>
+
+<style>
+body{
+    margin:0;
+    font-family:Segoe UI, sans-serif;
+    background:linear-gradient(135deg,#141E30,#243B55);
+    color:white;
+    text-align:center;
+}
+.container{
+    max-width:1100px;
+    margin:auto;
+    padding:20px;
+}
+h1{
+    margin-bottom:5px;
+}
+.card{
+    background:rgba(255,255,255,0.08);
+    padding:20px;
+    margin:15px 0;
+    border-radius:15px;
+}
+button{
+    padding:10px 18px;
+    border:none;
+    border-radius:8px;
+    cursor:pointer;
+    font-weight:bold;
+    background:#00c6ff;
+    color:black;
+    margin:5px;
+}
+button:hover{
+    background:#00ffcc;
+}
+select,input{
+    padding:8px;
+    border-radius:8px;
+    border:none;
+}
+.result{
+    margin-top:20px;
+}
+.number{
+    display:inline-block;
+    background:#ffcc00;
+    color:black;
+    padding:12px;
+    margin:5px;
+    border-radius:50%;
+    min-width:45px;
+    font-weight:bold;
+    animation: pop 0.4s ease;
+}
+.power{
+    background:#ff4444;
+    color:white;
+}
+@keyframes pop{
+    0%{transform:scale(0)}
+    100%{transform:scale(1)}
+}
+.history{
+    max-height:200px;
+    overflow:auto;
+    font-size:14px;
+}
+.stat{
+    margin-top:10px;
+    font-size:15px;
+    opacity:0.9;
+}
+</style>
+</head>
+
+<body>
+<div class="container">
+
+<h1>🎯 Vietlott AI Predictor PRO</h1>
+<p>Phiên bản nâng cấp – Giải trí tham khảo</p>
+
+<div class="card">
+
+<select id="game">
+<option value="mega">Mega 6/45</option>
+<option value="power">Power 6/55</option>
+<option value="keno">Keno</option>
+<option value="bingo">Bingo 18</option>
+<option value="lotto">Lotto 5/35</option>
+<option value="max3d">Max 3D</option>
+<option value="max3dpro">Max 3D Pro</option>
+</select>
+
+<input type="number" id="setCount" value="1" min="1" max="10">
+<button onclick="generate()">Tạo Số</button>
+
+<br><br>
+
+<input type="date" id="birthday">
+<button onclick="generateByBirthday()">Theo Ngày Sinh</button>
+
+<div class="result" id="result"></div>
+
+<div class="stat" id="stat"></div>
+
+</div>
+
+<div class="card">
+<h3>Lịch sử bộ số</h3>
+<div class="history" id="history"></div>
+<button onclick="clearHistory()">Xóa Lịch Sử</button>
+</div>
+
+</div>
+
+<script>
+
+function randomUnique(count,max){
+    let arr=[];
+    while(arr.length<count){
+        let num=Math.floor(Math.random()*max)+1;
+        if(!arr.includes(num)) arr.push(num);
+    }
+    return arr.sort((a,b)=>a-b);
+}
+
+function saveHistory(data){
+    let history=JSON.parse(localStorage.getItem("vietlott_history")||"[]");
+    history.unshift(data);
+    localStorage.setItem("vietlott_history",JSON.stringify(history));
+    loadHistory();
+}
+
+function loadHistory(){
+    let history=JSON.parse(localStorage.getItem("vietlott_history")||"[]");
+    let div=document.getElementById("history");
+    div.innerHTML="";
+    history.forEach(h=>{
+        div.innerHTML+=`<div>${h}</div>`;
+    });
+}
+
+function clearHistory(){
+    localStorage.removeItem("vietlott_history");
+    loadHistory();
+}
+
+function showNumbers(numbers,isCircle=true,isPower=false){
+    let result=document.getElementById("result");
+    numbers.forEach(n=>{
+        if(isCircle){
+            result.innerHTML+=`<div class="number ${isPower?'power':''}">${n}</div>`;
+        }else{
+            result.innerHTML+=`<span style="font-size:22px;margin:5px;">${n}</span>`;
+        }
+    });
+}
+
+function analyze(numbers){
+    let even=numbers.filter(n=>n%2===0).length;
+    let odd=numbers.length-even;
+    let sum=numbers.reduce((a,b)=>a+b,0);
+    document.getElementById("stat").innerHTML=
+        `Chẵn: ${even} | Lẻ: ${odd} | Tổng: ${sum}`;
+}
+
+function generate(){
+
+    let game=document.getElementById("game").value;
+    let count=parseInt(document.getElementById("setCount").value);
+    let result=document.getElementById("result");
+    result.innerHTML="";
+    document.getElementById("stat").innerHTML="";
+
+    for(let i=0;i<count;i++){
+
+        if(game==="mega"){
+            let nums=randomUnique(6,45);
+            showNumbers(nums);
+            analyze(nums);
+            saveHistory("Mega: "+nums.join("-"));
+        }
+
+        if(game==="power"){
+            let nums=randomUnique(6,55);
+            let power=Math.floor(Math.random()*55)+1;
+            showNumbers(nums);
+            showNumbers([power],true,true);
+            analyze(nums);
+            saveHistory("Power: "+nums.join("-")+" | "+power);
+        }
+
+        if(game==="keno"){
+            let nums=randomUnique(20,80);
+            showNumbers(nums);
+            saveHistory("Keno: "+nums.join("-"));
+        }
+
+        if(game==="bingo"){
+            let nums=randomUnique(18,99);
+            showNumbers(nums);
+            saveHistory("Bingo: "+nums.join("-"));
+        }
+
+        if(game==="lotto"){
+            let nums=randomUnique(5,35);
+            showNumbers(nums);
+            analyze(nums);
+            saveHistory("Lotto: "+nums.join("-"));
+        }
+
+        if(game==="max3d"){
+            let nums=[
+                Math.floor(Math.random()*10),
+                Math.floor(Math.random()*10),
+                Math.floor(Math.random()*10)
+            ];
+            showNumbers(nums,false);
+            saveHistory("Max3D: "+nums.join(""));
+        }
+
+        if(game==="max3dpro"){
+            for(let j=0;j<3;j++){
+                let nums=[
+                    Math.floor(Math.random()*10),
+                    Math.floor(Math.random()*10),
+                    Math.floor(Math.random()*10)
+                ];
+                showNumbers(nums,false);
+                result.innerHTML+="<br>";
+                saveHistory("Max3DPro: "+nums.join(""));
+            }
+        }
+
+        result.innerHTML+="<br><br>";
+    }
+}
+
+function generateByBirthday(){
+    let date=document.getElementById("birthday").value;
+    if(!date){alert("Chọn ngày sinh");return;}
+    let parts=date.split("-");
+    let nums=parts.map(n=>parseInt(n));
+    let result=document.getElementById("result");
+    result.innerHTML="";
+    showNumbers(nums);
+    analyze(nums);
+    saveHistory("Birthday: "+nums.join("-"));
+}
+
+loadHistory();
+
+</script>
+
+</body>
+</html>
