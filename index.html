@@ -3,118 +3,58 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Vietlott Predictor PRO MAX</title>
-
+<title>Vietlott Predictor Pro</title>
 <style>
-
-:root{
---bg:#0f172a;
---card:#1e293b;
---text:white;
---accent:#22c55e;
-}
-
-.light{
---bg:#f1f5f9;
---card:white;
---text:black;
---accent:#2563eb;
-}
-
 body{
-font-family:Arial;
-background:var(--bg);
-color:var(--text);
-text-align:center;
-padding:20px;
-transition:0.3s;
+    font-family: Arial;
+    background:#0f172a;
+    color:white;
+    text-align:center;
+    padding:20px;
 }
-
+h1{color:#22c55e}
 .container{
-max-width:700px;
-margin:auto;
-background:var(--card);
-padding:25px;
-border-radius:20px;
-box-shadow:0 0 20px rgba(0,0,0,0.4);
+    max-width:600px;
+    margin:auto;
+    background:#1e293b;
+    padding:20px;
+    border-radius:15px;
 }
-
-h1{color:var(--accent)}
-
 select,button{
-padding:10px;
-margin:5px;
-border-radius:10px;
-border:none;
+    padding:10px;
+    margin:5px;
+    border-radius:8px;
+    border:none;
 }
-
 button{
-background:var(--accent);
-color:white;
-font-weight:bold;
-cursor:pointer;
+    background:#22c55e;
+    color:black;
+    font-weight:bold;
+    cursor:pointer;
 }
-
-button:hover{
-opacity:0.85;
-}
-
 .result{
-margin-top:15px;
-font-size:20px;
-color:#facc15;
+    margin-top:15px;
+    font-size:22px;
+    color:#facc15;
 }
-
 .tabs{
-display:flex;
-justify-content:center;
-gap:10px;
+    display:flex;
+    justify-content:center;
+    gap:10px;
+    margin-bottom:10px;
 }
-
-.history{
-margin-top:20px;
-text-align:left;
-max-height:150px;
-overflow:auto;
-font-size:14px;
-background:rgba(0,0,0,0.2);
-padding:10px;
-border-radius:10px;
+.tabs select{
+    width:30%;
 }
-
-.badge{
-display:inline-block;
-padding:4px 10px;
-background:var(--accent);
-border-radius:20px;
-font-size:12px;
-margin-bottom:10px;
-}
-
-.mode-toggle{
-float:right;
-cursor:pointer;
-font-size:14px;
-}
-
-.ai-settings{
-margin-top:10px;
-}
-
 </style>
 </head>
 <body>
 
+<h1>🎯 Vietlott Predictor Pro</h1>
+
 <div class="container">
 
-<div class="mode-toggle" onclick="toggleMode()">🌙 Dark/Light</div>
-
-<h1>🎯 Vietlott Predictor PRO MAX</h1>
-
-<div class="badge">AI Edition</div>
-
-<br>
-
+<h3>Chọn sản phẩm</h3>
 <select id="game">
 <option value="mega">Mega 6/45</option>
 <option value="power">Power 6/55</option>
@@ -133,107 +73,102 @@ margin-top:10px;
 <select id="year"></select>
 </div>
 
-<div class="ai-settings">
-Số bộ AI:
-<select id="batch">
-<option>1</option>
-<option>3</option>
-<option>5</option>
-<option>10</option>
-</select>
-</div>
-
-<button onclick="generateAI()">Tạo số AI</button>
+<button onclick="generateByDOB()">Tạo số</button>
 
 <div class="result" id="result"></div>
-
-<h3>Lịch sử</h3>
-<div class="history" id="history"></div>
 
 </div>
 
 <script>
 
-// Populate ngày tháng năm
-for(let d=1; d<=31; d++) day.innerHTML+=`<option>${d}</option>`;
-for(let m=1; m<=12; m++) month.innerHTML+=`<option>${m}</option>`;
-for(let y=1950; y<=2026; y++) year.innerHTML+=`<option>${y}</option>`;
+// Tạo danh sách ngày tháng năm
+for(let d=1; d<=31; d++){
+    document.getElementById("day").innerHTML += `<option value="${d}">${d}</option>`;
+}
+for(let m=1; m<=12; m++){
+    document.getElementById("month").innerHTML += `<option value="${m}">${m}</option>`;
+}
+for(let y=1950; y<=2026; y++){
+    document.getElementById("year").innerHTML += `<option value="${y}">${y}</option>`;
+}
 
+// Hàm chuẩn hóa số về giới hạn
 function normalize(num,max){
-return ((num % max) + max) % max + 1;
+    return ((num % max) + max) % max + 1;
 }
 
-function seedRandom(seed){
-let x = Math.sin(seed)*10000;
-return Math.floor((x-Math.floor(x))*100000);
+// Tạo seed từ ngày sinh (không thập phân)
+function createSeed(day,month,year){
+    return day*1000000 + month*10000 + year;
 }
 
-function generateSet(seed,game){
-let numbers=[];
-function pushUnique(n,max){
-let val=normalize(n,max);
-while(numbers.includes(val)) val=normalize(val+1,max);
-numbers.push(val);
+// Bộ tạo số giả ngẫu nhiên dựa seed
+function seededRandom(seed){
+    let x = Math.sin(seed) * 10000;
+    return Math.floor((x - Math.floor(x)) * 1000000);
 }
 
-if(game==="mega") for(let i=0;i<6;i++) pushUnique(seedRandom(seed+i),45);
-if(game==="power") for(let i=0;i<6;i++) pushUnique(seedRandom(seed+i),55);
-if(game==="lotto") for(let i=0;i<5;i++) pushUnique(seedRandom(seed+i),35);
-if(game==="keno") for(let i=0;i<10;i++) pushUnique(seedRandom(seed+i),80);
-if(game==="bingo") for(let i=0;i<18;i++) pushUnique(seedRandom(seed+i),90);
-if(game==="max3d") numbers=[normalize(seedRandom(seed),1000)];
-if(game==="max3dpro"){
-numbers=[normalize(seedRandom(seed),1000),
-normalize(seedRandom(seed+1),1000)];
+function generateByDOB(){
+
+    let game = document.getElementById("game").value;
+    let day = parseInt(document.getElementById("day").value);
+    let month = parseInt(document.getElementById("month").value);
+    let year = parseInt(document.getElementById("year").value);
+
+    let seed = createSeed(day,month,year);
+    let numbers = [];
+
+    function uniquePush(num,max){
+        let n = normalize(num,max);
+        while(numbers.includes(n)){
+            n = normalize(n+1,max);
+        }
+        numbers.push(n);
+    }
+
+    if(game==="mega"){
+        for(let i=0;i<6;i++){
+            uniquePush(seededRandom(seed+i),45);
+        }
+    }
+
+    if(game==="power"){
+        for(let i=0;i<6;i++){
+            uniquePush(seededRandom(seed+i),55);
+        }
+    }
+
+    if(game==="lotto"){
+        for(let i=0;i<5;i++){
+            uniquePush(seededRandom(seed+i),35);
+        }
+    }
+
+    if(game==="keno"){
+        for(let i=0;i<10;i++){
+            uniquePush(seededRandom(seed+i),80);
+        }
+    }
+
+    if(game==="bingo"){
+        for(let i=0;i<18;i++){
+            uniquePush(seededRandom(seed+i),90);
+        }
+    }
+
+    if(game==="max3d"){
+        numbers.push(normalize(seededRandom(seed),1000));
+    }
+
+    if(game==="max3dpro"){
+        numbers.push(normalize(seededRandom(seed),1000));
+        numbers.push(normalize(seededRandom(seed+1),1000));
+    }
+
+    numbers.sort((a,b)=>a-b);
+
+    document.getElementById("result").innerHTML = numbers.join(" - ");
 }
-
-return numbers.sort((a,b)=>a-b);
-}
-
-function generateAI(){
-let game=document.getElementById("game").value;
-let batch=parseInt(document.getElementById("batch").value);
-let d=parseInt(day.value);
-let m=parseInt(month.value);
-let y=parseInt(year.value);
-
-let baseSeed=d*1000000+m*10000+y+Date.now();
-let output="";
-
-for(let i=0;i<batch;i++){
-let set=generateSet(baseSeed+i,game);
-output+=`Bộ ${i+1}: ${set.join(" - ")}<br>`;
-saveHistory(game,set);
-}
-
-document.getElementById("result").innerHTML=output;
-renderHistory();
-}
-
-function saveHistory(game,set){
-let history=JSON.parse(localStorage.getItem("history")||"[]");
-history.unshift({
-game:game,
-numbers:set,
-time:new Date().toLocaleString()
-});
-localStorage.setItem("history",JSON.stringify(history.slice(0,50)));
-}
-
-function renderHistory(){
-let history=JSON.parse(localStorage.getItem("history")||"[]");
-let html="";
-history.forEach(h=>{
-html+=`<div>[${h.time}] ${h.game}: ${h.numbers.join("-")}</div>`;
-});
-document.getElementById("history").innerHTML=html;
-}
-
-function toggleMode(){
-document.body.classList.toggle("light");
-}
-
-renderHistory();
 
 </script>
 
