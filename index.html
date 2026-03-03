@@ -18,7 +18,6 @@ body{
     margin:auto;
     padding:20px;
 }
-h1{margin-bottom:5px;}
 .card{
     background:rgba(255,255,255,0.08);
     padding:20px;
@@ -51,7 +50,7 @@ select,input{
     border-radius:50%;
     min-width:45px;
     font-weight:bold;
-    animation:pop 0.4s ease;
+    animation:pop 0.3s ease;
 }
 .power{
     background:#ff4444;
@@ -73,7 +72,7 @@ select,input{
     opacity:0.9;
 }
 
-/* Birthday Layout */
+/* Birthday */
 .birthday-wrapper{
     display:flex;
     justify-content:center;
@@ -98,10 +97,6 @@ select,input{
     background:#1f2f46;
     color:white;
     border:1px solid #00c6ff;
-    cursor:pointer;
-}
-.birthday-select select:hover{
-    border-color:#00ffcc;
 }
 </style>
 </head>
@@ -110,7 +105,7 @@ select,input{
 <div class="container">
 
 <h1>🎯 Vietlott AI Predictor PRO</h1>
-<p>Phiên bản nâng cấp – Giải trí tham khảo</p>
+<p>Giải trí tham khảo</p>
 
 <div class="card">
 
@@ -132,7 +127,6 @@ select,input{
 
 </div>
 
-<!-- Birthday Section -->
 <div class="card">
 <h3>🎂 Tạo Số Theo Ngày Sinh</h3>
 
@@ -141,25 +135,21 @@ select,input{
         <label>Ngày</label>
         <select id="day"></select>
     </div>
-
     <div class="birthday-select">
         <label>Tháng</label>
         <select id="month"></select>
     </div>
-
     <div class="birthday-select">
         <label>Năm</label>
         <select id="year"></select>
     </div>
-
     <button onclick="generateByBirthday()">Tạo Theo Ngày Sinh</button>
 </div>
 
 </div>
 
-<!-- History -->
 <div class="card">
-<h3>📜 Lịch Sử Bộ Số</h3>
+<h3>📜 Lịch Sử</h3>
 <div class="history" id="history"></div>
 <button onclick="clearHistory()">Xóa Lịch Sử</button>
 </div>
@@ -168,11 +158,23 @@ select,input{
 
 <script>
 
+function modNumber(num,max){
+    return ((num-1)%max)+1;
+}
+
+function uniquePush(arr,num,max){
+    let n=modNumber(num,max);
+    while(arr.includes(n)){
+        n = modNumber(n+1,max);
+    }
+    arr.push(n);
+}
+
 function randomUnique(count,max){
     let arr=[];
     while(arr.length<count){
-        let num=Math.floor(Math.random()*max)+1;
-        if(!arr.includes(num)) arr.push(num);
+        let n=Math.floor(Math.random()*max)+1;
+        if(!arr.includes(n)) arr.push(n);
     }
     return arr.sort((a,b)=>a-b);
 }
@@ -256,7 +258,7 @@ function generate(){
         }
 
         if(game==="bingo"){
-            let nums=randomUnique(18,99);
+            let nums=randomUnique(18,90);
             showNumbers(nums);
             saveHistory("Bingo: "+nums.join("-"));
         }
@@ -286,6 +288,7 @@ function generate(){
 
 function generateByBirthday(){
 
+    let game=document.getElementById("game").value;
     let day=parseInt(document.getElementById("day").value);
     let month=parseInt(document.getElementById("month").value);
     let year=parseInt(document.getElementById("year").value);
@@ -299,22 +302,83 @@ function generateByBirthday(){
     result.innerHTML="";
     document.getElementById("stat").innerHTML="";
 
-    let base=[day,month,year%100];
+    let base=[day,month,year%100,Math.floor(year/100)];
 
-    while(base.length<6){
-        let num=Math.floor(Math.random()*45)+1;
-        if(!base.includes(num)) base.push(num);
+    if(game==="mega"){
+        let arr=[];
+        base.forEach(n=>uniquePush(arr,n,45));
+        while(arr.length<6) uniquePush(arr,Math.random()*100,45);
+        arr.sort((a,b)=>a-b);
+        showNumbers(arr);
+        analyze(arr);
+        saveHistory("Mega Birthday: "+arr.join("-"));
     }
 
-    base=base.sort((a,b)=>a-b);
+    if(game==="power"){
+        let arr=[];
+        base.forEach(n=>uniquePush(arr,n,55));
+        while(arr.length<6) uniquePush(arr,Math.random()*100,55);
+        arr.sort((a,b)=>a-b);
+        let power=modNumber(day+month+year,55);
+        showNumbers(arr);
+        showNumbers([power],true,true);
+        analyze(arr);
+        saveHistory("Power Birthday: "+arr.join("-")+" | "+power);
+    }
 
-    showNumbers(base);
-    analyze(base);
-    saveHistory("Birthday: "+base.join("-"));
+    if(game==="lotto"){
+        let arr=[];
+        base.forEach(n=>uniquePush(arr,n,35));
+        while(arr.length<5) uniquePush(arr,Math.random()*100,35);
+        arr.sort((a,b)=>a-b);
+        showNumbers(arr);
+        analyze(arr);
+        saveHistory("Lotto Birthday: "+arr.join("-"));
+    }
+
+    if(game==="keno"){
+        let arr=[];
+        base.forEach(n=>uniquePush(arr,n,80));
+        while(arr.length<20) uniquePush(arr,Math.random()*200,80);
+        arr.sort((a,b)=>a-b);
+        showNumbers(arr);
+        saveHistory("Keno Birthday: "+arr.join("-"));
+    }
+
+    if(game==="bingo"){
+        let arr=[];
+        base.forEach(n=>uniquePush(arr,n,90));
+        while(arr.length<18) uniquePush(arr,Math.random()*200,90);
+        arr.sort((a,b)=>a-b);
+        showNumbers(arr);
+        saveHistory("Bingo Birthday: "+arr.join("-"));
+    }
+
+    if(game==="max3d"){
+        let digits=[
+            modNumber(day,10)-1,
+            modNumber(month,10)-1,
+            modNumber(year%100,10)-1
+        ];
+        showNumbers(digits,false);
+        saveHistory("Max3D Birthday: "+digits.join(""));
+    }
+
+    if(game==="max3dpro"){
+        for(let i=0;i<3;i++){
+            let digits=[
+                modNumber(day+i,10)-1,
+                modNumber(month+i,10)-1,
+                modNumber(year%100+i,10)-1
+            ];
+            showNumbers(digits,false);
+            result.innerHTML+="<br>";
+            saveHistory("Max3DPro Birthday: "+digits.join(""));
+        }
+    }
 }
 
 function initBirthdaySelectors(){
-
     let daySelect=document.getElementById("day");
     let monthSelect=document.getElementById("month");
     let yearSelect=document.getElementById("year");
@@ -346,6 +410,5 @@ loadHistory();
 initBirthdaySelectors();
 
 </script>
-
 </body>
 </html>
