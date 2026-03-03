@@ -3,56 +3,95 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Vietlott Predictor Pro</title>
+<title>Vietlott Predictor ULTRA AI</title>
+
 <style>
+:root{
+--bg:#0f172a;
+--card:#1e293b;
+--text:white;
+--accent:#22c55e;
+--result:#facc15;
+}
+
+.light{
+--bg:#f1f5f9;
+--card:white;
+--text:black;
+--accent:#2563eb;
+--result:#d97706;
+}
+
 body{
-    font-family: Arial;
-    background:#0f172a;
-    color:white;
-    text-align:center;
-    padding:20px;
+font-family:Arial;
+background:var(--bg);
+color:var(--text);
+text-align:center;
+padding:20px;
+transition:0.3s;
 }
-h1{color:#22c55e}
+
+h1{color:var(--accent)}
+
 .container{
-    max-width:600px;
-    margin:auto;
-    background:#1e293b;
-    padding:20px;
-    border-radius:15px;
+max-width:700px;
+margin:auto;
+background:var(--card);
+padding:20px;
+border-radius:15px;
+box-shadow:0 0 20px rgba(0,0,0,0.4);
 }
+
 select,button{
-    padding:10px;
-    margin:5px;
-    border-radius:8px;
-    border:none;
+padding:10px;
+margin:5px;
+border-radius:8px;
+border:none;
 }
+
 button{
-    background:#22c55e;
-    color:black;
-    font-weight:bold;
-    cursor:pointer;
+background:var(--accent);
+color:white;
+font-weight:bold;
+cursor:pointer;
 }
-.result{
-    margin-top:15px;
-    font-size:22px;
-    color:#facc15;
-}
+
+button:hover{opacity:0.85}
+
 .tabs{
-    display:flex;
-    justify-content:center;
-    gap:10px;
-    margin-bottom:10px;
+display:flex;
+justify-content:center;
+gap:10px;
+margin-bottom:10px;
 }
-.tabs select{
-    width:30%;
+
+.result{
+margin-top:15px;
+font-size:20px;
+color:var(--result);
 }
+
+canvas{
+background:white;
+border-radius:10px;
+margin-top:20px;
+}
+
+.mode-toggle{
+float:right;
+cursor:pointer;
+font-size:14px;
+}
+
 </style>
 </head>
 <body>
 
-<h1>🎯 Vietlott Predictor Pro</h1>
-
 <div class="container">
+
+<div class="mode-toggle" onclick="toggleMode()">🌙 Sáng/Tối</div>
+
+<h1>🎯 Vietlott ULTRA AI</h1>
 
 <h3>Chọn sản phẩm</h3>
 <select id="game">
@@ -65,6 +104,14 @@ button{
 <option value="max3dpro">Max 3D Pro</option>
 </select>
 
+<h3>Chiến lược AI</h3>
+<select id="strategy">
+<option value="balanced">Balanced</option>
+<option value="aggressive">Aggressive (Hot)</option>
+<option value="safe">Safe (Loại Cold)</option>
+<option value="chaos">Random Chaos</option>
+</select>
+
 <h3>Tạo số theo ngày sinh</h3>
 
 <div class="tabs">
@@ -73,101 +120,109 @@ button{
 <select id="year"></select>
 </div>
 
-<button onclick="generateByDOB()">Tạo số</button>
+<button onclick="runUltraAI()">Chạy ULTRA AI</button>
 
 <div class="result" id="result"></div>
+
+<canvas id="chart" width="600" height="250"></canvas>
 
 </div>
 
 <script>
 
-// Tạo danh sách ngày tháng năm
-for(let d=1; d<=31; d++){
-    document.getElementById("day").innerHTML += `<option value="${d}">${d}</option>`;
-}
-for(let m=1; m<=12; m++){
-    document.getElementById("month").innerHTML += `<option value="${m}">${m}</option>`;
-}
-for(let y=1950; y<=2026; y++){
-    document.getElementById("year").innerHTML += `<option value="${y}">${y}</option>`;
-}
+// Populate ngày tháng năm
+for(let d=1; d<=31; d++)
+document.getElementById("day").innerHTML+=`<option value="${d}">${d}</option>`;
 
-// Hàm chuẩn hóa số về giới hạn
-function normalize(num,max){
-    return ((num % max) + max) % max + 1;
+for(let m=1; m<=12; m++)
+document.getElementById("month").innerHTML+=`<option value="${m}">${m}</option>`;
+
+for(let y=1950; y<=2026; y++)
+document.getElementById("year").innerHTML+=`<option value="${y}">${y}</option>`;
+
+function normalize(n,max){
+return ((n%max)+max)%max+1;
 }
 
-// Tạo seed từ ngày sinh (không thập phân)
-function createSeed(day,month,year){
-    return day*1000000 + month*10000 + year;
+function rand(seed){
+let x=Math.sin(seed)*10000;
+return x-Math.floor(x);
 }
 
-// Bộ tạo số giả ngẫu nhiên dựa seed
-function seededRandom(seed){
-    let x = Math.sin(seed) * 10000;
-    return Math.floor((x - Math.floor(x)) * 1000000);
+function getConfig(game){
+if(game==="mega") return {count:6,max:45};
+if(game==="power") return {count:6,max:55};
+if(game==="lotto") return {count:5,max:35};
+if(game==="keno") return {count:10,max:80};
+if(game==="bingo") return {count:18,max:90};
+if(game==="max3d") return {count:1,max:1000};
+if(game==="max3dpro") return {count:2,max:1000};
 }
 
-function generateByDOB(){
+function simulateHotCold(max){
+let freq=Array(max+1).fill(0);
+for(let i=0;i<1000;i++){
+let num=Math.floor(Math.random()*max)+1;
+freq[num]++;
+}
+return freq;
+}
 
-    let game = document.getElementById("game").value;
-    let day = parseInt(document.getElementById("day").value);
-    let month = parseInt(document.getElementById("month").value);
-    let year = parseInt(document.getElementById("year").value);
+function drawChart(freq){
+let canvas=document.getElementById("chart");
+let ctx=canvas.getContext("2d");
+ctx.clearRect(0,0,600,250);
+let maxVal=Math.max(...freq);
+let barWidth=600/freq.length;
 
-    let seed = createSeed(day,month,year);
-    let numbers = [];
+for(let i=1;i<freq.length;i++){
+let height=(freq[i]/maxVal)*200;
+ctx.fillStyle="#22c55e";
+ctx.fillRect(i*barWidth,250-height,barWidth-1,height);
+}
+}
 
-    function uniquePush(num,max){
-        let n = normalize(num,max);
-        while(numbers.includes(n)){
-            n = normalize(n+1,max);
-        }
-        numbers.push(n);
-    }
+function runUltraAI(){
 
-    if(game==="mega"){
-        for(let i=0;i<6;i++){
-            uniquePush(seededRandom(seed+i),45);
-        }
-    }
+let game=document.getElementById("game").value;
+let strategy=document.getElementById("strategy").value;
+let config=getConfig(game);
 
-    if(game==="power"){
-        for(let i=0;i<6;i++){
-            uniquePush(seededRandom(seed+i),55);
-        }
-    }
+let d=parseInt(document.getElementById("day").value);
+let m=parseInt(document.getElementById("month").value);
+let y=parseInt(document.getElementById("year").value);
 
-    if(game==="lotto"){
-        for(let i=0;i<5;i++){
-            uniquePush(seededRandom(seed+i),35);
-        }
-    }
+let seed=d*1000000+m*10000+y+Date.now();
 
-    if(game==="keno"){
-        for(let i=0;i<10;i++){
-            uniquePush(seededRandom(seed+i),80);
-        }
-    }
+let freq=simulateHotCold(config.max);
 
-    if(game==="bingo"){
-        for(let i=0;i<18;i++){
-            uniquePush(seededRandom(seed+i),90);
-        }
-    }
+let hot=freq.indexOf(Math.max(...freq));
+let cold=freq.slice(1).indexOf(Math.min(...freq.slice(1)))+1;
 
-    if(game==="max3d"){
-        numbers.push(normalize(seededRandom(seed),1000));
-    }
+let numbers=[];
 
-    if(game==="max3dpro"){
-        numbers.push(normalize(seededRandom(seed),1000));
-        numbers.push(normalize(seededRandom(seed+1),1000));
-    }
+while(numbers.length<config.count){
 
-    numbers.sort((a,b)=>a-b);
+let r=Math.floor(rand(seed++)*config.max)+1;
 
-    document.getElementById("result").innerHTML = numbers.join(" - ");
+if(strategy==="aggressive" && r!==hot) continue;
+if(strategy==="safe" && r===cold) continue;
+
+if(!numbers.includes(r)) numbers.push(r);
+}
+
+numbers.sort((a,b)=>a-b);
+
+drawChart(freq);
+
+document.getElementById("result").innerHTML=
+`Kết quả: ${numbers.join(" - ")}<br>
+🔥 Hot: ${hot} | ❄ Cold: ${cold}`;
+
+}
+
+function toggleMode(){
+document.body.classList.toggle("light");
 }
 
 </script>
