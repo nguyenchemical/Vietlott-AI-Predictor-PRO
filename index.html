@@ -11,7 +11,6 @@
 --card:#1e293b;
 --text:white;
 --accent:#22c55e;
---result:#facc15;
 }
 
 .light{
@@ -19,7 +18,6 @@
 --card:white;
 --text:black;
 --accent:#2563eb;
---result:#d97706;
 }
 
 body{
@@ -37,13 +35,7 @@ margin:auto;
 background:var(--card);
 padding:25px;
 border-radius:20px;
-box-shadow:0 0 30px rgba(0,0,0,0.6);
-animation:fadeIn 0.6s ease-in-out;
-}
-
-@keyframes fadeIn{
-from{opacity:0; transform:translateY(10px);}
-to{opacity:1; transform:translateY(0);}
+box-shadow:0 0 30px rgba(0,0,0,0.5);
 }
 
 h1{
@@ -89,19 +81,15 @@ gap:10px;
 margin-bottom:10px;
 }
 
-.result{
-margin-top:20px;
-}
-
 .number-ball{
 display:inline-block;
-background:var(--accent);
-color:white;
-padding:12px 15px;
-margin:5px;
+background:#facc15;       /* Nền vàng */
+color:black;              /* Số màu đen */
+padding:12px 16px;
+margin:6px;
 border-radius:50%;
 font-weight:bold;
-box-shadow:0 0 10px var(--accent);
+box-shadow:0 0 10px rgba(250,204,21,0.8);
 animation:pop 0.3s ease;
 }
 
@@ -112,8 +100,8 @@ to{transform:scale(1);}
 
 .info{
 margin-top:10px;
-color:var(--result);
 font-size:14px;
+color:#facc15;
 }
 
 canvas{
@@ -127,7 +115,6 @@ float:right;
 cursor:pointer;
 font-size:14px;
 }
-
 </style>
 </head>
 <body>
@@ -138,8 +125,6 @@ font-size:14px;
 
 <h1>🎯 Vietlott ULTRA AI</h1>
 <div class="badge">AI Edition</div>
-
-<br>
 
 <select id="game">
 <option value="mega">Mega 6/45</option>
@@ -153,7 +138,7 @@ font-size:14px;
 
 <select id="strategy">
 <option value="balanced">Balanced</option>
-<option value="aggressive">Aggressive (Hot)</option>
+<option value="aggressive">Aggressive (Ưu tiên Hot)</option>
 <option value="safe">Safe (Loại Cold)</option>
 <option value="chaos">Random Chaos</option>
 </select>
@@ -168,7 +153,7 @@ font-size:14px;
 
 <button onclick="runUltraAI()">🚀 Chạy ULTRA AI</button>
 
-<div class="result" id="result"></div>
+<div id="result"></div>
 <div class="info" id="info"></div>
 
 <canvas id="chart" width="650" height="250"></canvas>
@@ -177,7 +162,7 @@ font-size:14px;
 
 <script>
 
-// Populate ngày tháng năm
+// Tạo danh sách ngày tháng năm
 for(let d=1; d<=31; d++)
 document.getElementById("day").innerHTML+=`<option value="${d}">${d}</option>`;
 
@@ -187,15 +172,7 @@ document.getElementById("month").innerHTML+=`<option value="${m}">${m}</option>`
 for(let y=1950; y<=2026; y++)
 document.getElementById("year").innerHTML+=`<option value="${y}">${y}</option>`;
 
-function normalize(n,max){
-return ((n%max)+max)%max+1;
-}
-
-function rand(seed){
-let x=Math.sin(seed)*10000;
-return x-Math.floor(x);
-}
-
+// Lấy cấu hình từng game
 function getConfig(game){
 if(game==="mega") return {count:6,max:45};
 if(game==="power") return {count:6,max:55};
@@ -206,19 +183,53 @@ if(game==="max3d") return {count:1,max:1000};
 if(game==="max3dpro") return {count:2,max:1000};
 }
 
-function simulateHotCold(max){
-let freq=Array(max+1).fill(0);
-for(let i=0;i<1000;i++){
-let num=Math.floor(Math.random()*max)+1;
-freq[num]++;
-}
-return freq;
+// Sinh số ngẫu nhiên an toàn
+function generateNumbers(config,strategy,seed){
+
+let numbers=[];
+let attempts=0;
+let maxAttempts=10000;
+
+let freq=Array(config.max+1).fill(0);
+
+// Giả lập hot/cold
+for(let i=0;i<500;i++){
+let r=Math.floor(Math.random()*config.max)+1;
+freq[r]++;
 }
 
+let hot=freq.indexOf(Math.max(...freq));
+let cold=freq.slice(1).indexOf(Math.min(...freq.slice(1)))+1;
+
+while(numbers.length<config.count && attempts<maxAttempts){
+
+let r=Math.floor(Math.random()*config.max)+1;
+
+if(strategy==="safe" && r===cold){ attempts++; continue; }
+
+if(!numbers.includes(r)){
+numbers.push(r);
+}
+
+attempts++;
+}
+
+// Nếu aggressive → đảm bảo có hot number
+if(strategy==="aggressive" && !numbers.includes(hot)){
+numbers[0]=hot;
+}
+
+numbers.sort((a,b)=>a-b);
+
+return {numbers,hot,cold,freq};
+}
+
+// Vẽ biểu đồ nhẹ để không lag
 function drawChart(freq){
 let canvas=document.getElementById("chart");
 let ctx=canvas.getContext("2d");
 ctx.clearRect(0,0,650,250);
+
 let maxVal=Math.max(...freq);
 let barWidth=650/freq.length;
 
@@ -235,42 +246,18 @@ let game=document.getElementById("game").value;
 let strategy=document.getElementById("strategy").value;
 let config=getConfig(game);
 
-let d=parseInt(document.getElementById("day").value);
-let m=parseInt(document.getElementById("month").value);
-let y=parseInt(document.getElementById("year").value);
+let result=generateNumbers(config,strategy,Date.now());
 
-let seed=d*1000000+m*10000+y+Date.now();
+drawChart(result.freq);
 
-let freq=simulateHotCold(config.max);
-
-let hot=freq.indexOf(Math.max(...freq));
-let cold=freq.slice(1).indexOf(Math.min(...freq.slice(1)))+1;
-
-let numbers=[];
-
-while(numbers.length<config.count){
-
-let r=Math.floor(rand(seed++)*config.max)+1;
-
-if(strategy==="aggressive" && r!==hot) continue;
-if(strategy==="safe" && r===cold) continue;
-
-if(!numbers.includes(r)) numbers.push(r);
-}
-
-numbers.sort((a,b)=>a-b);
-
-drawChart(freq);
-
-// Hiển thị số dạng viên tròn
 let html="";
-numbers.forEach(n=>{
+result.numbers.forEach(n=>{
 html+=`<div class="number-ball">${n}</div>`;
 });
 
 document.getElementById("result").innerHTML=html;
 document.getElementById("info").innerHTML=
-`🔥 Hot: ${hot} | ❄ Cold: ${cold}`;
+`🔥 Hot: ${result.hot} | ❄ Cold: ${result.cold}`;
 }
 
 function toggleMode(){
@@ -278,6 +265,5 @@ document.body.classList.toggle("light");
 }
 
 </script>
-
 </body>
 </html>
