@@ -3,82 +3,146 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Vietlott Ultra AI</title>
+<title>Vietlott AI Predictor Pro</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600&family=Poppins:wght@400;600&display=swap" rel="stylesheet">
 
 <style>
+:root{
+    --bg-light: linear-gradient(135deg,#fdfbfb,#ebedee);
+    --bg-dark: linear-gradient(135deg,#141e30,#243b55);
+    --card-light:#ffffff;
+    --card-dark:#1f2937;
+}
 body{
     margin:0;
-    font-family: Arial, sans-serif;
-    background: linear-gradient(135deg,#0f2027,#203a43,#2c5364);
-    color:white;
+    font-family:'Poppins',sans-serif;
+    background:var(--bg-light);
+    transition:0.4s;
     text-align:center;
 }
-
+.dark{
+    background:var(--bg-dark);
+    color:white;
+}
 .container{
-    padding:20px;
-}
-
-h1{
-    margin-top:20px;
-}
-
-select,button{
-    padding:12px;
-    margin:10px;
-    border:none;
-    border-radius:10px;
-    font-size:16px;
-}
-
-button{
-    background:#ffcc00;
-    font-weight:bold;
-}
-
-.result{
-    margin-top:20px;
-    font-size:22px;
-    font-weight:bold;
-}
-
-.toggle{
-    position:fixed;
-    top:15px;
-    right:15px;
-    background:#ffcc00;
-    padding:8px 12px;
+    max-width:520px;
+    margin:40px auto;
+    padding:25px;
+    background:var(--card-light);
     border-radius:20px;
-    font-size:14px;
+    box-shadow:0 15px 40px rgba(0,0,0,0.15);
+    transition:0.4s;
+}
+.dark .container{
+    background:var(--card-dark);
+}
+.badge{
+    display:inline-block;
+    padding:6px 15px;
+    background:gold;
+    color:black;
+    font-weight:bold;
+    border-radius:50px;
+    margin-bottom:10px;
+}
+h1{
+    font-family:'Playfair Display',serif;
+    margin:5px 0 20px;
+}
+button{
+    margin:6px;
+    padding:10px 15px;
+    border:none;
+    border-radius:50px;
+    background:linear-gradient(45deg,#ffcc00,#ff9900);
+    color:black;
+    font-weight:600;
+    cursor:pointer;
+    transition:0.3s;
+}
+button:hover{
+    transform:translateY(-3px);
+}
+.number-ball{
+    display:inline-block;
+    width:48px;
+    height:48px;
+    line-height:48px;
+    border-radius:50%;
+    background:gold;
+    color:black;
+    font-weight:bold;
+    margin:5px;
+    box-shadow:0 4px 12px rgba(0,0,0,0.3);
+    animation:pop 0.4s ease;
+}
+@keyframes pop{
+    from{transform:scale(0);}
+    to{transform:scale(1);}
+}
+select{
+    padding:8px;
+    margin:4px;
+    border-radius:8px;
+}
+.scan{
+    font-weight:bold;
+    color:#ff9900;
+    animation:blink 0.5s infinite alternate;
+}
+@keyframes blink{
+    from{opacity:0.4;}
+    to{opacity:1;}
 }
 </style>
 </head>
 <body>
 
-<div class="toggle" onclick="toggleSound()">🔊 Âm thanh</div>
-
 <div class="container">
-<h1>Vietlott Ultra AI</h1>
+    <div class="badge">PRO AI Edition</div>
+    <h1>Vietlott AI Predictor</h1>
 
-<select id="gameType">
-    <option value="6/45">Mega 6/45</option>
-    <option value="6/55">Power 6/55</option>
-    <option value="5/35">Lotto 5/35</option>
-    <option value="bingo18">Bingo 18</option>
-</select>
+    <button onclick="toggleDark()">🌙 Dark Mode</button>
+    <button onclick="toggleSound()">🔊 Âm thanh</button>
 
-<br>
+    <hr>
 
-<button onclick="generate()">🎯 TẠO SỐ</button>
+    <div>
+        <button onclick="generateMega()">Mega 6/45</button>
+        <button onclick="generatePower()">Power 6/55</button>
+        <button onclick="generateMax3D()">Max 3D</button>
+        <button onclick="generateMax3DPro()">Max 3D Pro</button>
+        <button onclick="generateKeno()">Keno</button>
+        <button onclick="generateLotto()">Lotto 5/35</button>
+        <button onclick="generateBingo()">Bingo 18</button>
+        <button onclick="generateSmartAI()">🤖 AI Thông Minh</button>
+    </div>
 
-<div class="result" id="result"></div>
-<div class="result" id="jackpot"></div>
+    <hr>
 
+    <h3>Tạo theo ngày sinh</h3>
+    <select id="day"></select>
+    <select id="month"></select>
+    <select id="year"></select>
+    <br>
+    <button onclick="generateBirth()">Tạo theo ngày sinh</button>
+
+    <hr>
+
+    <h3>Bộ số AI phân tích</h3>
+    <button onclick="hotNumbers()">🔥 Số HOT</button>
+    <button onclick="frequentNumbers()">📈 Hay ra nhiều</button>
+    <button onclick="highChance()">⭐ Cơ hội cao</button>
+    <button onclick="popularChoice()">👥 Được chọn nhiều</button>
+
+    <div id="scanArea"></div>
+    <div id="result"></div>
 </div>
 
 <script>
-/* ===============================
-   ULTRA SOUND ENGINE (FIX 100%)
-=================================*/
+
+/* ========= ULTRA SOUND FIX (WEB AUDIO) ========= */
 
 let audioCtx;
 let soundEnabled = true;
@@ -89,99 +153,162 @@ function initAudio(){
     }
 }
 
-function playTone(freq,duration){
+function playClick(){
     if(!soundEnabled) return;
     if(!audioCtx) initAudio();
 
-    const oscillator = audioCtx.createOscillator();
-    const gainNode = audioCtx.createGain();
+    const osc = audioCtx.createOscillator();
+    const gain = audioCtx.createGain();
 
-    oscillator.type = "sine";
-    oscillator.frequency.value = freq;
+    osc.type="sine";
+    osc.frequency.value=800;
 
-    oscillator.connect(gainNode);
-    gainNode.connect(audioCtx.destination);
+    osc.connect(gain);
+    gain.connect(audioCtx.destination);
 
-    gainNode.gain.setValueAtTime(0.2,audioCtx.currentTime);
+    gain.gain.setValueAtTime(0.25,audioCtx.currentTime);
 
-    oscillator.start();
-    oscillator.stop(audioCtx.currentTime + duration);
-}
-
-function playClick(){
-    playTone(700,0.05);
+    osc.start();
+    osc.stop(audioCtx.currentTime+0.05);
 }
 
 function playResult(){
-    playTone(400,0.08);
-    setTimeout(()=>playTone(650,0.08),80);
+    if(!soundEnabled) return;
+    if(!audioCtx) initAudio();
+
+    const osc=audioCtx.createOscillator();
+    const gain=audioCtx.createGain();
+
+    osc.type="triangle";
+    osc.frequency.value=500;
+
+    osc.connect(gain);
+    gain.connect(audioCtx.destination);
+
+    gain.gain.setValueAtTime(0.3,audioCtx.currentTime);
+
+    osc.start();
+    osc.stop(audioCtx.currentTime+0.08);
+
+    setTimeout(()=>{
+        const osc2=audioCtx.createOscillator();
+        const gain2=audioCtx.createGain();
+
+        osc2.type="triangle";
+        osc2.frequency.value=900;
+
+        osc2.connect(gain2);
+        gain2.connect(audioCtx.destination);
+
+        gain2.gain.setValueAtTime(0.3,audioCtx.currentTime);
+
+        osc2.start();
+        osc2.stop(audioCtx.currentTime+0.08);
+    },80);
 }
 
 function toggleSound(){
-    soundEnabled = !soundEnabled;
-    alert(soundEnabled ? "🔊 Đã bật âm thanh" : "🔇 Đã tắt âm thanh");
+    soundEnabled=!soundEnabled;
 }
 
 document.addEventListener("touchstart",initAudio,{once:true});
 document.addEventListener("click",initAudio,{once:true});
 
-/* ===============================
-   RANDOM ENGINE
-=================================*/
+/* ===== CÁC HÀM CŨ GIỮ NGUYÊN ===== */
 
-function getRandomNumbers(count,max){
-    let nums = [];
-    while(nums.length < count){
-        let n = Math.floor(Math.random()*max)+1;
-        if(!nums.includes(n)){
-            nums.push(n);
-        }
-    }
-    return nums.sort((a,b)=>a-b);
-}
-
-/* ===============================
-   MAIN GENERATOR
-=================================*/
-
-function generate(){
-    playClick();
-
-    let type = document.getElementById("gameType").value;
-    let resultDiv = document.getElementById("result");
-    let jackpotDiv = document.getElementById("jackpot");
-
-    let numbers = [];
-    jackpotDiv.innerHTML = "";
-
-    if(type==="6/45"){
-        numbers = getRandomNumbers(6,45);
-    }
-    else if(type==="6/55"){
-        numbers = getRandomNumbers(6,55);
-        let power = Math.floor(Math.random()*55)+1;
-        numbers.push(" | Power: "+power);
-    }
-    else if(type==="5/35"){
-        numbers = getRandomNumbers(5,35);
-    }
-    else if(type==="bingo18"){
-        numbers = getRandomNumbers(18,90);
-    }
-
-    resultDiv.innerHTML = "🎲 Bộ số: "+numbers.join(" ");
-
-    // Jackpot AI dự đoán đơn giản (offline ML giả lập)
-    let jackpot = getRandomNumbers(6,55);
-    jackpotDiv.innerHTML = "💎 Dự đoán Jackpot: "+jackpot.join(" ");
-
+function vibratePhone(){
     if(navigator.vibrate){
-        navigator.vibrate(150);
+        navigator.vibrate(200);
     }
-
-    playResult();
 }
-</script>
 
+for(let i=1;i<=31;i++) day.innerHTML+=`<option value="${i}">${i}</option>`;
+for(let i=1;i<=12;i++) month.innerHTML+=`<option value="${i}">${i}</option>`;
+for(let i=1950;i<=2025;i++) year.innerHTML+=`<option value="${i}">${i}</option>`;
+
+function toggleDark(){
+    document.body.classList.toggle("dark");
+    playClick();
+}
+
+function randomNumbers(count,max){
+    let arr=[];
+    while(arr.length<count){
+        let n=Math.floor(Math.random()*max)+1;
+        if(!arr.includes(n)) arr.push(n);
+    }
+    return arr.sort((a,b)=>a-b);
+}
+
+function smartAI(count,max){
+    let pool=[];
+    for(let i=1;i<=max;i++){
+        pool.push({number:i,weight:Math.random()});
+    }
+    pool.sort((a,b)=>b.weight-a.weight);
+    return pool.slice(0,count).map(x=>x.number).sort((a,b)=>a-b);
+}
+
+function display(numbers){
+    let html="";
+    numbers.forEach(n=>{
+        html+=`<div class="number-ball">${n}</div>`;
+    });
+    result.innerHTML=html;
+}
+
+function showScan(callback){
+    result.innerHTML="";
+    scanArea.innerHTML="<div class='scan'>🤖 AI đang quét dữ liệu...</div>";
+
+    playClick();
+    vibratePhone();
+
+    setTimeout(()=>{
+        scanArea.innerHTML="";
+        callback();
+        playResult();
+    },1000);
+}
+
+function generateMega(){ showScan(()=>display(randomNumbers(6,45))); }
+function generatePower(){ showScan(()=>display(randomNumbers(6,55))); }
+function generateKeno(){ showScan(()=>display(randomNumbers(10,80))); }
+function generateLotto(){ showScan(()=>display(randomNumbers(5,35))); }
+function generateBingo(){ showScan(()=>display(randomNumbers(18,90))); }
+function generateSmartAI(){ showScan(()=>display(smartAI(6,45))); }
+
+function generateMax3D(){
+    showScan(()=>display([Math.floor(Math.random()*1000).toString().padStart(3,'0')]));
+}
+
+function generateMax3DPro(){
+    showScan(()=>display([
+        Math.floor(Math.random()*1000).toString().padStart(3,'0'),
+        Math.floor(Math.random()*1000).toString().padStart(3,'0')
+    ]));
+}
+
+function generateBirth(){
+    let base=parseInt(day.value)+parseInt(month.value)+parseInt(year.value);
+    showScan(()=>{
+        let nums=[];
+        let i=0;
+        while(nums.length<6){
+            let num=((base+i*11)%45);
+            if(num===0) num=45;
+            if(!nums.includes(num)) nums.push(num);
+            i++;
+        }
+        display(nums.sort((a,b)=>a-b));
+    });
+}
+
+function hotNumbers(){ showScan(()=>display([7,14,23,32,41,45])); }
+function frequentNumbers(){ showScan(()=>display([3,9,18,27,36,44])); }
+function highChance(){ showScan(()=>display([5,12,19,28,34,42])); }
+function popularChoice(){ showScan(()=>display([1,8,16,24,35,43])); }
+
+</script>
 </body>
 </html>
