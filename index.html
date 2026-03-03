@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Vietlott Predictor ULTRA AI</title>
+<title>Vietlott ULTRA AI</title>
 
 <style>
 :root{
@@ -23,7 +23,7 @@
 }
 
 body{
-font-family:Arial;
+font-family:Arial, sans-serif;
 background:var(--bg);
 color:var(--text);
 text-align:center;
@@ -31,21 +31,41 @@ padding:20px;
 transition:0.3s;
 }
 
-h1{color:var(--accent)}
-
 .container{
-max-width:700px;
+max-width:750px;
 margin:auto;
 background:var(--card);
-padding:20px;
-border-radius:15px;
-box-shadow:0 0 20px rgba(0,0,0,0.4);
+padding:25px;
+border-radius:20px;
+box-shadow:0 0 30px rgba(0,0,0,0.6);
+animation:fadeIn 0.6s ease-in-out;
+}
+
+@keyframes fadeIn{
+from{opacity:0; transform:translateY(10px);}
+to{opacity:1; transform:translateY(0);}
+}
+
+h1{
+color:var(--accent);
+margin-bottom:5px;
+}
+
+.badge{
+display:inline-block;
+background:var(--accent);
+color:white;
+padding:5px 15px;
+border-radius:20px;
+font-size:12px;
+margin-bottom:15px;
+box-shadow:0 0 15px var(--accent);
 }
 
 select,button{
 padding:10px;
-margin:5px;
-border-radius:8px;
+margin:6px;
+border-radius:10px;
 border:none;
 }
 
@@ -54,9 +74,13 @@ background:var(--accent);
 color:white;
 font-weight:bold;
 cursor:pointer;
+transition:0.2s;
 }
 
-button:hover{opacity:0.85}
+button:hover{
+transform:scale(1.05);
+box-shadow:0 0 15px var(--accent);
+}
 
 .tabs{
 display:flex;
@@ -66,9 +90,30 @@ margin-bottom:10px;
 }
 
 .result{
-margin-top:15px;
-font-size:20px;
+margin-top:20px;
+}
+
+.number-ball{
+display:inline-block;
+background:var(--accent);
+color:white;
+padding:12px 15px;
+margin:5px;
+border-radius:50%;
+font-weight:bold;
+box-shadow:0 0 10px var(--accent);
+animation:pop 0.3s ease;
+}
+
+@keyframes pop{
+from{transform:scale(0.6);}
+to{transform:scale(1);}
+}
+
+.info{
+margin-top:10px;
 color:var(--result);
+font-size:14px;
 }
 
 canvas{
@@ -92,8 +137,10 @@ font-size:14px;
 <div class="mode-toggle" onclick="toggleMode()">🌙 Sáng/Tối</div>
 
 <h1>🎯 Vietlott ULTRA AI</h1>
+<div class="badge">AI Edition</div>
 
-<h3>Chọn sản phẩm</h3>
+<br>
+
 <select id="game">
 <option value="mega">Mega 6/45</option>
 <option value="power">Power 6/55</option>
@@ -104,7 +151,6 @@ font-size:14px;
 <option value="max3dpro">Max 3D Pro</option>
 </select>
 
-<h3>Chiến lược AI</h3>
 <select id="strategy">
 <option value="balanced">Balanced</option>
 <option value="aggressive">Aggressive (Hot)</option>
@@ -120,11 +166,12 @@ font-size:14px;
 <select id="year"></select>
 </div>
 
-<button onclick="runUltraAI()">Chạy ULTRA AI</button>
+<button onclick="runUltraAI()">🚀 Chạy ULTRA AI</button>
 
 <div class="result" id="result"></div>
+<div class="info" id="info"></div>
 
-<canvas id="chart" width="600" height="250"></canvas>
+<canvas id="chart" width="650" height="250"></canvas>
 
 </div>
 
@@ -171,9 +218,9 @@ return freq;
 function drawChart(freq){
 let canvas=document.getElementById("chart");
 let ctx=canvas.getContext("2d");
-ctx.clearRect(0,0,600,250);
+ctx.clearRect(0,0,650,250);
 let maxVal=Math.max(...freq);
-let barWidth=600/freq.length;
+let barWidth=650/freq.length;
 
 for(let i=1;i<freq.length;i++){
 let height=(freq[i]/maxVal)*200;
@@ -215,10 +262,15 @@ numbers.sort((a,b)=>a-b);
 
 drawChart(freq);
 
-document.getElementById("result").innerHTML=
-`Kết quả: ${numbers.join(" - ")}<br>
-🔥 Hot: ${hot} | ❄ Cold: ${cold}`;
+// Hiển thị số dạng viên tròn
+let html="";
+numbers.forEach(n=>{
+html+=`<div class="number-ball">${n}</div>`;
+});
 
+document.getElementById("result").innerHTML=html;
+document.getElementById("info").innerHTML=
+`🔥 Hot: ${hot} | ❄ Cold: ${cold}`;
 }
 
 function toggleMode(){
