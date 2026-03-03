@@ -3,51 +3,117 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Vietlott ULTRA AI</title>
+<title>Vietlott Predictor PRO MAX</title>
+
 <style>
+
+:root{
+--bg:#0f172a;
+--card:#1e293b;
+--text:white;
+--accent:#22c55e;
+}
+
+.light{
+--bg:#f1f5f9;
+--card:white;
+--text:black;
+--accent:#2563eb;
+}
+
 body{
 font-family:Arial;
-background:#0f172a;
-color:white;
+background:var(--bg);
+color:var(--text);
 text-align:center;
 padding:20px;
+transition:0.3s;
 }
+
 .container{
-max-width:900px;
+max-width:700px;
 margin:auto;
-background:#1e293b;
-padding:20px;
+background:var(--card);
+padding:25px;
 border-radius:20px;
+box-shadow:0 0 20px rgba(0,0,0,0.4);
 }
-h1{color:#22c55e}
+
+h1{color:var(--accent)}
+
 select,button{
-padding:8px;
+padding:10px;
 margin:5px;
-border-radius:8px;
+border-radius:10px;
 border:none;
 }
+
 button{
-background:#22c55e;
+background:var(--accent);
+color:white;
 font-weight:bold;
 cursor:pointer;
 }
+
+button:hover{
+opacity:0.85;
+}
+
 .result{
 margin-top:15px;
-font-size:18px;
+font-size:20px;
 color:#facc15;
 }
-canvas{
-background:white;
-border-radius:10px;
-margin-top:20px;
+
+.tabs{
+display:flex;
+justify-content:center;
+gap:10px;
 }
+
+.history{
+margin-top:20px;
+text-align:left;
+max-height:150px;
+overflow:auto;
+font-size:14px;
+background:rgba(0,0,0,0.2);
+padding:10px;
+border-radius:10px;
+}
+
+.badge{
+display:inline-block;
+padding:4px 10px;
+background:var(--accent);
+border-radius:20px;
+font-size:12px;
+margin-bottom:10px;
+}
+
+.mode-toggle{
+float:right;
+cursor:pointer;
+font-size:14px;
+}
+
+.ai-settings{
+margin-top:10px;
+}
+
 </style>
 </head>
 <body>
 
 <div class="container">
 
-<h1>🤖 Vietlott ULTRA AI</h1>
+<div class="mode-toggle" onclick="toggleMode()">🌙 Dark/Light</div>
+
+<h1>🎯 Vietlott Predictor PRO MAX</h1>
+
+<div class="badge">AI Edition</div>
+
+<br>
 
 <select id="game">
 <option value="mega">Mega 6/45</option>
@@ -59,112 +125,115 @@ margin-top:20px;
 <option value="max3dpro">Max 3D Pro</option>
 </select>
 
-<select id="strategy">
-<option value="balanced">Balanced</option>
-<option value="aggressive">Aggressive (Hot)</option>
-<option value="safe">Safe (No Cold)</option>
-<option value="chaos">Random Chaos</option>
-</select>
+<h3>Tạo số theo ngày sinh</h3>
 
-<br>
-
+<div class="tabs">
 <select id="day"></select>
 <select id="month"></select>
 <select id="year"></select>
+</div>
 
-<br>
+<div class="ai-settings">
+Số bộ AI:
+<select id="batch">
+<option>1</option>
+<option>3</option>
+<option>5</option>
+<option>10</option>
+</select>
+</div>
 
-<button onclick="runUltraAI()">Chạy ULTRA AI</button>
+<button onclick="generateAI()">Tạo số AI</button>
 
 <div class="result" id="result"></div>
 
-<canvas id="chart" width="800" height="300"></canvas>
+<h3>Lịch sử</h3>
+<div class="history" id="history"></div>
 
 </div>
 
 <script>
 
-// populate date
+// Populate ngày tháng năm
 for(let d=1; d<=31; d++) day.innerHTML+=`<option>${d}</option>`;
 for(let m=1; m<=12; m++) month.innerHTML+=`<option>${m}</option>`;
 for(let y=1950; y<=2026; y++) year.innerHTML+=`<option>${y}</option>`;
 
-function normalize(n,max){
-return ((n%max)+max)%max+1;
+function normalize(num,max){
+return ((num % max) + max) % max + 1;
 }
 
-function rand(seed){
-let x=Math.sin(seed)*10000;
-return x-Math.floor(x);
+function seedRandom(seed){
+let x = Math.sin(seed)*10000;
+return Math.floor((x-Math.floor(x))*100000);
 }
 
-function getConfig(game){
-if(game==="mega") return {count:6,max:45};
-if(game==="power") return {count:6,max:55};
-if(game==="lotto") return {count:5,max:35};
-if(game==="keno") return {count:10,max:80};
-if(game==="bingo") return {count:18,max:90};
-if(game==="max3d") return {count:1,max:1000};
-if(game==="max3dpro") return {count:2,max:1000};
-}
-
-function simulateHotCold(max){
-let freq=Array(max+1).fill(0);
-for(let i=0;i<1000;i++){
-let num=Math.floor(Math.random()*max)+1;
-freq[num]++;
-}
-return freq;
-}
-
-function drawChart(freq){
-let canvas=document.getElementById("chart");
-let ctx=canvas.getContext("2d");
-ctx.clearRect(0,0,800,300);
-let maxVal=Math.max(...freq);
-let barWidth=800/freq.length;
-
-for(let i=1;i<freq.length;i++){
-let height=(freq[i]/maxVal)*250;
-ctx.fillStyle="#22c55e";
-ctx.fillRect(i*barWidth,300-height,barWidth-1,height);
-}
-}
-
-function runUltraAI(){
-
-let game=gameSelect=document.getElementById("game").value;
-let strategy=document.getElementById("strategy").value;
-let config=getConfig(game);
-
-let seed=day.value*1000000+month.value*10000+year.value+Date.now();
-
-let freq=simulateHotCold(config.max);
-
-let hot=freq.indexOf(Math.max(...freq));
-let cold=freq.indexOf(Math.min(...freq.slice(1)));
-
+function generateSet(seed,game){
 let numbers=[];
-
-while(numbers.length<config.count){
-
-let r=Math.floor(rand(seed++)*config.max)+1;
-
-if(strategy==="aggressive" && r!==hot) continue;
-if(strategy==="safe" && r===cold) continue;
-
-if(!numbers.includes(r)) numbers.push(r);
+function pushUnique(n,max){
+let val=normalize(n,max);
+while(numbers.includes(val)) val=normalize(val+1,max);
+numbers.push(val);
 }
 
-numbers.sort((a,b)=>a-b);
-
-drawChart(freq);
-
-document.getElementById("result").innerHTML=
-`Kết quả: ${numbers.join(" - ")}<br>
-🔥 Hot: ${hot} | ❄ Cold: ${cold}`;
-
+if(game==="mega") for(let i=0;i<6;i++) pushUnique(seedRandom(seed+i),45);
+if(game==="power") for(let i=0;i<6;i++) pushUnique(seedRandom(seed+i),55);
+if(game==="lotto") for(let i=0;i<5;i++) pushUnique(seedRandom(seed+i),35);
+if(game==="keno") for(let i=0;i<10;i++) pushUnique(seedRandom(seed+i),80);
+if(game==="bingo") for(let i=0;i<18;i++) pushUnique(seedRandom(seed+i),90);
+if(game==="max3d") numbers=[normalize(seedRandom(seed),1000)];
+if(game==="max3dpro"){
+numbers=[normalize(seedRandom(seed),1000),
+normalize(seedRandom(seed+1),1000)];
 }
+
+return numbers.sort((a,b)=>a-b);
+}
+
+function generateAI(){
+let game=document.getElementById("game").value;
+let batch=parseInt(document.getElementById("batch").value);
+let d=parseInt(day.value);
+let m=parseInt(month.value);
+let y=parseInt(year.value);
+
+let baseSeed=d*1000000+m*10000+y+Date.now();
+let output="";
+
+for(let i=0;i<batch;i++){
+let set=generateSet(baseSeed+i,game);
+output+=`Bộ ${i+1}: ${set.join(" - ")}<br>`;
+saveHistory(game,set);
+}
+
+document.getElementById("result").innerHTML=output;
+renderHistory();
+}
+
+function saveHistory(game,set){
+let history=JSON.parse(localStorage.getItem("history")||"[]");
+history.unshift({
+game:game,
+numbers:set,
+time:new Date().toLocaleString()
+});
+localStorage.setItem("history",JSON.stringify(history.slice(0,50)));
+}
+
+function renderHistory(){
+let history=JSON.parse(localStorage.getItem("history")||"[]");
+let html="";
+history.forEach(h=>{
+html+=`<div>[${h.time}] ${h.game}: ${h.numbers.join("-")}</div>`;
+});
+document.getElementById("history").innerHTML=html;
+}
+
+function toggleMode(){
+document.body.classList.toggle("light");
+}
+
+renderHistory();
 
 </script>
 
