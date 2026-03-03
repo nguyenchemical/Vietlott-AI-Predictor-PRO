@@ -126,6 +126,8 @@ select{
         <button onclick="generateMax3D()">Max 3D</button>
         <button onclick="generateMax3DPro()">Max 3D Pro</button>
         <button onclick="generateKeno()">Keno</button>
+        <button onclick="generateLotto()">Lotto 5/35</button>
+        <button onclick="generateBingo()">Bingo 18</button>
     </div>
 
     <hr>
@@ -151,23 +153,19 @@ select{
 
 <script>
 
-// ===== Sound =====
 function playSound(){
     const audio = new Audio("https://assets.mixkit.co/sfx/preview/mixkit-game-ball-tap-2073.mp3");
     audio.play();
 }
 
-// ===== Populate date =====
 for(let i=1;i<=31;i++) day.innerHTML+=`<option value="${i}">${i}</option>`;
 for(let i=1;i<=12;i++) month.innerHTML+=`<option value="${i}">${i}</option>`;
 for(let i=1950;i<=2025;i++) year.innerHTML+=`<option value="${i}">${i}</option>`;
 
-// ===== Dark Mode =====
 function toggleDark(){
     document.body.classList.toggle("dark");
 }
 
-// ===== Random unique =====
 function randomNumbers(count,max){
     let arr=[];
     while(arr.length<count){
@@ -178,13 +176,13 @@ function randomNumbers(count,max){
 }
 
 function showScan(callback){
-    document.getElementById("result").innerHTML="";
-    document.getElementById("scanArea").innerHTML="<div class='scan'>🤖 AI đang quét dữ liệu...</div>";
+    result.innerHTML="";
+    scanArea.innerHTML="<div class='scan'>🤖 AI đang quét dữ liệu...</div>";
     setTimeout(()=>{
-        document.getElementById("scanArea").innerHTML="";
+        scanArea.innerHTML="";
         callback();
         playSound();
-    },1200);
+    },1000);
 }
 
 function display(numbers){
@@ -192,13 +190,21 @@ function display(numbers){
     numbers.forEach(n=>{
         html+=`<div class="number-ball">${n}</div>`;
     });
-    document.getElementById("result").innerHTML=html;
+    result.innerHTML=html;
 }
 
-// ===== Products =====
 function generateMega(){ showScan(()=>display(randomNumbers(6,45))); }
 function generatePower(){ showScan(()=>display(randomNumbers(6,55))); }
-function generateMax3D(){ showScan(()=>display([Math.floor(Math.random()*1000).toString().padStart(3,'0')])); }
+function generateKeno(){ showScan(()=>display(randomNumbers(10,80))); }
+function generateLotto(){ showScan(()=>display(randomNumbers(5,35))); }
+function generateBingo(){ showScan(()=>display(randomNumbers(18,90))); }
+
+function generateMax3D(){
+    showScan(()=>{
+        display([Math.floor(Math.random()*1000).toString().padStart(3,'0')]);
+    });
+}
+
 function generateMax3DPro(){
     showScan(()=>{
         display([
@@ -207,23 +213,22 @@ function generateMax3DPro(){
         ]);
     });
 }
-function generateKeno(){ showScan(()=>display(randomNumbers(10,80))); }
 
-// ===== Birth =====
 function generateBirth(){
     let base=parseInt(day.value)+parseInt(month.value)+parseInt(year.value);
     showScan(()=>{
         let nums=[];
-        for(let i=0;i<6;i++){
-            let num=((base+i*7)%45);
+        let i=0;
+        while(nums.length<6){
+            let num=((base + i*11) % 45);
             if(num===0) num=45;
             if(!nums.includes(num)) nums.push(num);
+            i++;
         }
         display(nums.sort((a,b)=>a-b));
     });
 }
 
-// ===== AI sets =====
 function hotNumbers(){ showScan(()=>display([7,14,23,32,41,45])); }
 function frequentNumbers(){ showScan(()=>display([3,9,18,27,36,44])); }
 function highChance(){ showScan(()=>display([5,12,19,28,34,42])); }
