@@ -117,6 +117,7 @@ select{
     <h1>Vietlott AI Predictor</h1>
 
     <button onclick="toggleDark()">🌙 Dark Mode</button>
+    <button onclick="toggleSound()">🔊 Âm thanh</button>
 
     <hr>
 
@@ -128,6 +129,7 @@ select{
         <button onclick="generateKeno()">Keno</button>
         <button onclick="generateLotto()">Lotto 5/35</button>
         <button onclick="generateBingo()">Bingo 18</button>
+        <button onclick="generateSmartAI()">🤖 AI Thông Minh</button>
     </div>
 
     <hr>
@@ -153,19 +155,43 @@ select{
 
 <script>
 
-function playSound(){
-    const audio = new Audio("https://assets.mixkit.co/sfx/preview/mixkit-game-ball-tap-2073.mp3");
-    audio.play();
-}
+let soundEnabled = true;
 
+// ===== Populate Date =====
 for(let i=1;i<=31;i++) day.innerHTML+=`<option value="${i}">${i}</option>`;
 for(let i=1;i<=12;i++) month.innerHTML+=`<option value="${i}">${i}</option>`;
 for(let i=1950;i<=2025;i++) year.innerHTML+=`<option value="${i}">${i}</option>`;
 
-function toggleDark(){
-    document.body.classList.toggle("dark");
+// ===== Sound =====
+function playClick(){
+    if(soundEnabled)
+    new Audio("https://assets.mixkit.co/sfx/preview/mixkit-select-click-1109.mp3").play();
 }
 
+function playResult(){
+    if(soundEnabled)
+    new Audio("https://assets.mixkit.co/sfx/preview/mixkit-winning-notification-2018.mp3").play();
+}
+
+function toggleSound(){
+    soundEnabled=!soundEnabled;
+    alert(soundEnabled?"Đã bật âm thanh":"Đã tắt âm thanh");
+}
+
+// ===== Vibrate =====
+function vibratePhone(){
+    if(navigator.vibrate){
+        navigator.vibrate(200);
+    }
+}
+
+// ===== Dark Mode =====
+function toggleDark(){
+    document.body.classList.toggle("dark");
+    playClick();
+}
+
+// ===== Random =====
 function randomNumbers(count,max){
     let arr=[];
     while(arr.length<count){
@@ -175,16 +201,20 @@ function randomNumbers(count,max){
     return arr.sort((a,b)=>a-b);
 }
 
-function showScan(callback){
-    result.innerHTML="";
-    scanArea.innerHTML="<div class='scan'>🤖 AI đang quét dữ liệu...</div>";
-    setTimeout(()=>{
-        scanArea.innerHTML="";
-        callback();
-        playSound();
-    },1000);
+// ===== Smart AI Pattern =====
+function smartAI(count,max){
+    let pool=[];
+    for(let i=1;i<=max;i++){
+        pool.push({
+            number:i,
+            weight:Math.random()+ (i%2===0?0.2:0.1) + (i>max/2?0.1:0)
+        });
+    }
+    pool.sort((a,b)=>b.weight-a.weight);
+    return pool.slice(0,count).map(x=>x.number).sort((a,b)=>a-b);
 }
 
+// ===== Display =====
 function display(numbers){
     let html="";
     numbers.forEach(n=>{
@@ -193,34 +223,47 @@ function display(numbers){
     result.innerHTML=html;
 }
 
+function showScan(callback){
+    result.innerHTML="";
+    scanArea.innerHTML="<div class='scan'>🤖 AI đang quét dữ liệu...</div>";
+
+    playClick();
+    vibratePhone();
+
+    setTimeout(()=>{
+        scanArea.innerHTML="";
+        callback();
+        playResult();
+    },1000);
+}
+
+// ===== Products =====
 function generateMega(){ showScan(()=>display(randomNumbers(6,45))); }
 function generatePower(){ showScan(()=>display(randomNumbers(6,55))); }
 function generateKeno(){ showScan(()=>display(randomNumbers(10,80))); }
 function generateLotto(){ showScan(()=>display(randomNumbers(5,35))); }
 function generateBingo(){ showScan(()=>display(randomNumbers(18,90))); }
+function generateSmartAI(){ showScan(()=>display(smartAI(6,45))); }
 
 function generateMax3D(){
-    showScan(()=>{
-        display([Math.floor(Math.random()*1000).toString().padStart(3,'0')]);
-    });
+    showScan(()=>display([Math.floor(Math.random()*1000).toString().padStart(3,'0')]));
 }
 
 function generateMax3DPro(){
-    showScan(()=>{
-        display([
-            Math.floor(Math.random()*1000).toString().padStart(3,'0'),
-            Math.floor(Math.random()*1000).toString().padStart(3,'0')
-        ]);
-    });
+    showScan(()=>display([
+        Math.floor(Math.random()*1000).toString().padStart(3,'0'),
+        Math.floor(Math.random()*1000).toString().padStart(3,'0')
+    ]));
 }
 
+// ===== Birth =====
 function generateBirth(){
     let base=parseInt(day.value)+parseInt(month.value)+parseInt(year.value);
     showScan(()=>{
         let nums=[];
         let i=0;
         while(nums.length<6){
-            let num=((base + i*11) % 45);
+            let num=((base+i*11)%45);
             if(num===0) num=45;
             if(!nums.includes(num)) nums.push(num);
             i++;
@@ -229,12 +272,12 @@ function generateBirth(){
     });
 }
 
+// ===== AI Sets =====
 function hotNumbers(){ showScan(()=>display([7,14,23,32,41,45])); }
 function frequentNumbers(){ showScan(()=>display([3,9,18,27,36,44])); }
 function highChance(){ showScan(()=>display([5,12,19,28,34,42])); }
 function popularChoice(){ showScan(()=>display([1,8,16,24,35,43])); }
 
 </script>
-
 </body>
 </html>
