@@ -5,53 +5,40 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Vietlott ULTRA AI</title>
 
+<!-- Font thư pháp -->
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600&display=swap" rel="stylesheet">
+
 <style>
-:root{
---bg:#0f172a;
---card:#1e293b;
---text:white;
---accent:#22c55e;
-}
-
-.light{
---bg:#f1f5f9;
---card:white;
---text:black;
---accent:#2563eb;
-}
-
 body{
-font-family:Arial, sans-serif;
-background:var(--bg);
-color:var(--text);
+font-family:'Playfair Display', serif;
+background:linear-gradient(135deg,#fde68a,#fca5a5);
 text-align:center;
 padding:20px;
-transition:0.3s;
 }
 
 .container{
 max-width:750px;
 margin:auto;
-background:var(--card);
+background:white;
 padding:25px;
 border-radius:20px;
-box-shadow:0 0 30px rgba(0,0,0,0.5);
+box-shadow:0 15px 35px rgba(0,0,0,0.2);
 }
 
 h1{
-color:var(--accent);
+color:#b45309;
 margin-bottom:5px;
 }
 
 .badge{
 display:inline-block;
-background:var(--accent);
+background:#f59e0b;
 color:white;
 padding:5px 15px;
 border-radius:20px;
 font-size:12px;
 margin-bottom:15px;
-box-shadow:0 0 15px var(--accent);
+box-shadow:0 0 15px #f59e0b;
 }
 
 select,button{
@@ -59,10 +46,11 @@ padding:10px;
 margin:6px;
 border-radius:10px;
 border:none;
+font-family:'Playfair Display', serif;
 }
 
 button{
-background:var(--accent);
+background:#f59e0b;
 color:white;
 font-weight:bold;
 cursor:pointer;
@@ -71,7 +59,7 @@ transition:0.2s;
 
 button:hover{
 transform:scale(1.05);
-box-shadow:0 0 15px var(--accent);
+box-shadow:0 0 15px #f59e0b;
 }
 
 .tabs{
@@ -83,8 +71,8 @@ margin-bottom:10px;
 
 .number-ball{
 display:inline-block;
-background:#facc15;       /* Nền vàng */
-color:black;              /* Số màu đen */
+background:#facc15;
+color:black;
 padding:12px 16px;
 margin:6px;
 border-radius:50%;
@@ -101,31 +89,19 @@ to{transform:scale(1);}
 .info{
 margin-top:10px;
 font-size:14px;
-color:#facc15;
+color:#b45309;
 }
 
-canvas{
-background:white;
-border-radius:10px;
-margin-top:20px;
-}
-
-.mode-toggle{
-float:right;
-cursor:pointer;
-font-size:14px;
-}
 </style>
 </head>
 <body>
 
 <div class="container">
 
-<div class="mode-toggle" onclick="toggleMode()">🌙 Sáng/Tối</div>
-
 <h1>🎯 Vietlott ULTRA AI</h1>
 <div class="badge">AI Edition</div>
 
+<h3>Chọn sản phẩm</h3>
 <select id="game">
 <option value="mega">Mega 6/45</option>
 <option value="power">Power 6/55</option>
@@ -136,33 +112,26 @@ font-size:14px;
 <option value="max3dpro">Max 3D Pro</option>
 </select>
 
-<select id="strategy">
-<option value="balanced">Balanced</option>
-<option value="aggressive">Aggressive (Ưu tiên Hot)</option>
-<option value="safe">Safe (Loại Cold)</option>
-<option value="chaos">Random Chaos</option>
-</select>
-
-<h3>Tạo số theo ngày sinh</h3>
-
+<h3>Chọn ngày sinh</h3>
 <div class="tabs">
 <select id="day"></select>
 <select id="month"></select>
 <select id="year"></select>
 </div>
 
-<button onclick="runUltraAI()">🚀 Chạy ULTRA AI</button>
+<br>
+
+<button onclick="generateByDOB()">🎂 Tạo số theo ngày sinh</button>
+<button onclick="generateRandom()">🎲 Tạo số theo sản phẩm</button>
 
 <div id="result"></div>
 <div class="info" id="info"></div>
-
-<canvas id="chart" width="650" height="250"></canvas>
 
 </div>
 
 <script>
 
-// Tạo danh sách ngày tháng năm
+// Populate ngày tháng năm
 for(let d=1; d<=31; d++)
 document.getElementById("day").innerHTML+=`<option value="${d}">${d}</option>`;
 
@@ -172,7 +141,7 @@ document.getElementById("month").innerHTML+=`<option value="${m}">${m}</option>`
 for(let y=1950; y<=2026; y++)
 document.getElementById("year").innerHTML+=`<option value="${y}">${y}</option>`;
 
-// Lấy cấu hình từng game
+// Lấy cấu hình
 function getConfig(game){
 if(game==="mega") return {count:6,max:45};
 if(game==="power") return {count:6,max:55};
@@ -183,85 +152,54 @@ if(game==="max3d") return {count:1,max:1000};
 if(game==="max3dpro") return {count:2,max:1000};
 }
 
-// Sinh số ngẫu nhiên an toàn
-function generateNumbers(config,strategy,seed){
+function generateCore(config,seed){
 
 let numbers=[];
 let attempts=0;
-let maxAttempts=10000;
 
-let freq=Array(config.max+1).fill(0);
-
-// Giả lập hot/cold
-for(let i=0;i<500;i++){
+while(numbers.length<config.count && attempts<10000){
 let r=Math.floor(Math.random()*config.max)+1;
-freq[r]++;
-}
-
-let hot=freq.indexOf(Math.max(...freq));
-let cold=freq.slice(1).indexOf(Math.min(...freq.slice(1)))+1;
-
-while(numbers.length<config.count && attempts<maxAttempts){
-
-let r=Math.floor(Math.random()*config.max)+1;
-
-if(strategy==="safe" && r===cold){ attempts++; continue; }
-
-if(!numbers.includes(r)){
-numbers.push(r);
-}
-
+if(!numbers.includes(r)) numbers.push(r);
 attempts++;
 }
 
-// Nếu aggressive → đảm bảo có hot number
-if(strategy==="aggressive" && !numbers.includes(hot)){
-numbers[0]=hot;
-}
-
 numbers.sort((a,b)=>a-b);
-
-return {numbers,hot,cold,freq};
+return numbers;
 }
 
-// Vẽ biểu đồ nhẹ để không lag
-function drawChart(freq){
-let canvas=document.getElementById("chart");
-let ctx=canvas.getContext("2d");
-ctx.clearRect(0,0,650,250);
-
-let maxVal=Math.max(...freq);
-let barWidth=650/freq.length;
-
-for(let i=1;i<freq.length;i++){
-let height=(freq[i]/maxVal)*200;
-ctx.fillStyle="#22c55e";
-ctx.fillRect(i*barWidth,250-height,barWidth-1,height);
-}
-}
-
-function runUltraAI(){
-
-let game=document.getElementById("game").value;
-let strategy=document.getElementById("strategy").value;
-let config=getConfig(game);
-
-let result=generateNumbers(config,strategy,Date.now());
-
-drawChart(result.freq);
-
+function displayNumbers(numbers){
 let html="";
-result.numbers.forEach(n=>{
+numbers.forEach(n=>{
 html+=`<div class="number-ball">${n}</div>`;
 });
-
 document.getElementById("result").innerHTML=html;
-document.getElementById("info").innerHTML=
-`🔥 Hot: ${result.hot} | ❄ Cold: ${result.cold}`;
 }
 
-function toggleMode(){
-document.body.classList.toggle("light");
+// Theo ngày sinh
+function generateByDOB(){
+let game=document.getElementById("game").value;
+let config=getConfig(game);
+
+let d=parseInt(day.value);
+let m=parseInt(month.value);
+let y=parseInt(year.value);
+
+let seed=d*1000000+m*10000+y;
+Math.seedrandom=seed;
+
+let numbers=generateCore(config,seed);
+displayNumbers(numbers);
+document.getElementById("info").innerHTML="🎂 Bộ số theo ngày sinh";
+}
+
+// Ngẫu nhiên theo sản phẩm
+function generateRandom(){
+let game=document.getElementById("game").value;
+let config=getConfig(game);
+
+let numbers=generateCore(config,Date.now());
+displayNumbers(numbers);
+document.getElementById("info").innerHTML="🎲 Bộ số ngẫu nhiên";
 }
 
 </script>
