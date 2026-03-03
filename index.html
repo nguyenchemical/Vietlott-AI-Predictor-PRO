@@ -2,260 +2,232 @@
 <html lang="vi">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-<title>Vietlott ULTRA AI</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Vietlott AI Predictor Pro</title>
 
-<link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600&family=Poppins:wght@400;600&display=swap" rel="stylesheet">
 
 <style>
-*{margin:0;padding:0;box-sizing:border-box;}
+:root{
+    --bg-light: linear-gradient(135deg,#fdfbfb,#ebedee);
+    --bg-dark: linear-gradient(135deg,#141e30,#243b55);
+    --card-light:#ffffff;
+    --card-dark:#1f2937;
+}
 
 body{
-background: linear-gradient(135deg,#fff9e6,#ffe082);
-font-family: Arial, sans-serif;
-min-height:100vh;
-display:flex;
-justify-content:center;
+    margin:0;
+    font-family:'Poppins',sans-serif;
+    background:var(--bg-light);
+    transition:0.4s;
+    text-align:center;
 }
 
-.app{
-width:100%;
-max-width:500px;
-padding:20px;
+.dark{
+    background:var(--bg-dark);
+    color:white;
 }
 
-.header{
-text-align:center;
-margin-bottom:20px;
+.container{
+    max-width:520px;
+    margin:40px auto;
+    padding:25px;
+    background:var(--card-light);
+    border-radius:20px;
+    box-shadow:0 15px 40px rgba(0,0,0,0.15);
+    transition:0.4s;
 }
 
-.title{
-font-family:'Dancing Script',cursive;
-font-size:34px;
-color:#d50000;
+.dark .container{
+    background:var(--card-dark);
 }
 
 .badge{
-background:#ffcc00;
-color:#000;
-padding:5px 12px;
-border-radius:20px;
-font-size:13px;
-display:inline-block;
-margin-top:8px;
-box-shadow:0 0 10px rgba(0,0,0,0.2);
+    display:inline-block;
+    padding:6px 15px;
+    background:gold;
+    color:black;
+    font-weight:bold;
+    border-radius:50px;
+    margin-bottom:10px;
 }
 
-.tabs{
-display:flex;
-flex-wrap:wrap;
-gap:8px;
-margin-top:20px;
+h1{
+    font-family:'Playfair Display',serif;
+    margin:5px 0 20px;
 }
 
-.tab-btn{
-flex:1;
-padding:10px;
-border:none;
-border-radius:10px;
-background:#ffcc00;
-color:#000;
-font-weight:bold;
-cursor:pointer;
-transition:0.3s;
-box-shadow:0 4px 10px rgba(0,0,0,0.2);
+button{
+    margin:6px;
+    padding:10px 15px;
+    border:none;
+    border-radius:50px;
+    background:linear-gradient(45deg,#ffcc00,#ff9900);
+    color:black;
+    font-weight:600;
+    cursor:pointer;
+    transition:0.3s;
 }
 
-.tab-btn:hover{
-transform:translateY(-2px);
-box-shadow:0 6px 15px rgba(0,0,0,0.3);
+button:hover{
+    transform:translateY(-3px);
 }
 
-.section{
-display:none;
-margin-top:20px;
-animation:fade 0.4s ease;
+.number-ball{
+    display:inline-block;
+    width:48px;
+    height:48px;
+    line-height:48px;
+    border-radius:50%;
+    background:gold;
+    color:black;
+    font-weight:bold;
+    margin:5px;
+    box-shadow:0 4px 12px rgba(0,0,0,0.3);
+    animation:pop 0.4s ease;
 }
 
-.active{
-display:block;
+@keyframes pop{
+    from{transform:scale(0);}
+    to{transform:scale(1);}
 }
 
-@keyframes fade{
-from{opacity:0;transform:translateY(10px);}
-to{opacity:1;transform:translateY(0);}
+select{
+    padding:8px;
+    margin:4px;
+    border-radius:8px;
 }
 
-select,input{
-width:100%;
-padding:10px;
-border-radius:10px;
-border:1px solid #ccc;
-margin-bottom:10px;
+.scan{
+    font-weight:bold;
+    color:#ff9900;
+    animation:blink 0.5s infinite alternate;
 }
 
-button.generate{
-width:100%;
-padding:12px;
-background:#ffcc00;
-color:#000;
-border:none;
-border-radius:15px;
-font-weight:bold;
-cursor:pointer;
-box-shadow:0 4px 15px rgba(0,0,0,0.3);
-transition:0.3s;
-}
-
-button.generate:hover{
-transform:scale(1.05);
-box-shadow:0 0 20px gold;
-}
-
-.result{
-margin-top:20px;
-display:flex;
-flex-wrap:wrap;
-gap:10px;
-justify-content:center;
-}
-
-.ball{
-width:45px;
-height:45px;
-background:#ffd600;
-color:#000;
-border-radius:50%;
-display:flex;
-align-items:center;
-justify-content:center;
-font-weight:bold;
-box-shadow:0 0 10px rgba(0,0,0,0.3);
+@keyframes blink{
+    from{opacity:0.4;}
+    to{opacity:1;}
 }
 </style>
 </head>
-
 <body>
 
-<div class="app">
+<div class="container">
+    <div class="badge">PRO AI Edition</div>
+    <h1>Vietlott AI Predictor</h1>
 
-<div class="header">
-<div class="title">Vietlott ULTRA AI</div>
-<div class="badge">AI Edition Pro Max</div>
+    <button onclick="toggleDark()">🌙 Dark Mode</button>
+
+    <hr>
+
+    <div>
+        <button onclick="generateMega()">Mega 6/45</button>
+        <button onclick="generatePower()">Power 6/55</button>
+        <button onclick="generateMax3D()">Max 3D</button>
+        <button onclick="generateMax3DPro()">Max 3D Pro</button>
+        <button onclick="generateKeno()">Keno</button>
+    </div>
+
+    <hr>
+
+    <h3>Tạo theo ngày sinh</h3>
+    <select id="day"></select>
+    <select id="month"></select>
+    <select id="year"></select>
+    <br>
+    <button onclick="generateBirth()">Tạo theo ngày sinh</button>
+
+    <hr>
+
+    <h3>Bộ số AI phân tích</h3>
+    <button onclick="hotNumbers()">🔥 Số HOT</button>
+    <button onclick="frequentNumbers()">📈 Hay ra nhiều</button>
+    <button onclick="highChance()">⭐ Cơ hội cao</button>
+    <button onclick="popularChoice()">👥 Được chọn nhiều</button>
+
+    <div id="scanArea"></div>
+    <div id="result"></div>
 </div>
-
-<div class="tabs">
-<button class="tab-btn" onclick="showTab('product')">🎯 Sản phẩm</button>
-<button class="tab-btn" onclick="showTab('birth')">🎂 Ngày sinh</button>
-<button class="tab-btn" onclick="showTab('hot')">🔥 Số Hot</button>
-<button class="tab-btn" onclick="showTab('popular')">💎 Chọn nhiều</button>
-<button class="tab-btn" onclick="showTab('ai')">🚀 Cơ hội cao</button>
-</div>
-
-<!-- Sản phẩm -->
-<div id="product" class="section active">
-<select id="game">
-<option value="mega">Mega 6/45</option>
-<option value="power">Power 6/55</option>
-</select>
-<button class="generate" onclick="generateProduct()">Tạo số</button>
-</div>
-
-<!-- Ngày sinh -->
-<div id="birth" class="section">
-<input type="date" id="dob">
-<button class="generate" onclick="generateBirth()">Tạo theo ngày sinh</button>
-</div>
-
-<!-- Hot -->
-<div id="hot" class="section">
-<button class="generate" onclick="generateHot()">Tạo số Hot</button>
-</div>
-
-<!-- Popular -->
-<div id="popular" class="section">
-<button class="generate" onclick="generatePopular()">Bộ số chọn nhiều</button>
-</div>
-
-<!-- AI -->
-<div id="ai" class="section">
-<button class="generate" onclick="generateAI()">AI Phân tích cơ hội cao</button>
-</div>
-
-<div class="result" id="result"></div>
-
-</div>
-
-<audio id="sound">
-<source src="https://actions.google.com/sounds/v1/cartoon/clang_and_wobble.ogg" type="audio/ogg">
-</audio>
 
 <script>
 
-function showTab(id){
-document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));
-document.getElementById(id).classList.add('active');
-document.getElementById('result').innerHTML="";
-}
-
+// ===== Sound =====
 function playSound(){
-document.getElementById('sound').play();
+    const audio = new Audio("https://assets.mixkit.co/sfx/preview/mixkit-game-ball-tap-2073.mp3");
+    audio.play();
 }
 
-function render(nums){
-let result=document.getElementById('result');
-result.innerHTML="";
-nums.forEach(n=>{
-let div=document.createElement('div');
-div.className="ball";
-div.textContent=n;
-result.appendChild(div);
-});
-playSound();
+// ===== Populate date =====
+for(let i=1;i<=31;i++) day.innerHTML+=`<option value="${i}">${i}</option>`;
+for(let i=1;i<=12;i++) month.innerHTML+=`<option value="${i}">${i}</option>`;
+for(let i=1950;i<=2025;i++) year.innerHTML+=`<option value="${i}">${i}</option>`;
+
+// ===== Dark Mode =====
+function toggleDark(){
+    document.body.classList.toggle("dark");
 }
 
-function randomSet(count,max){
-let arr=[];
-while(arr.length<count){
-let n=Math.floor(Math.random()*max)+1;
-if(!arr.includes(n)) arr.push(n);
-}
-return arr.sort((a,b)=>a-b);
-}
-
-function generateProduct(){
-let game=document.getElementById('game').value;
-if(game==="mega") render(randomSet(6,45));
-if(game==="power") render(randomSet(6,55));
+// ===== Random unique =====
+function randomNumbers(count,max){
+    let arr=[];
+    while(arr.length<count){
+        let n=Math.floor(Math.random()*max)+1;
+        if(!arr.includes(n)) arr.push(n);
+    }
+    return arr.sort((a,b)=>a-b);
 }
 
+function showScan(callback){
+    document.getElementById("result").innerHTML="";
+    document.getElementById("scanArea").innerHTML="<div class='scan'>🤖 AI đang quét dữ liệu...</div>";
+    setTimeout(()=>{
+        document.getElementById("scanArea").innerHTML="";
+        callback();
+        playSound();
+    },1200);
+}
+
+function display(numbers){
+    let html="";
+    numbers.forEach(n=>{
+        html+=`<div class="number-ball">${n}</div>`;
+    });
+    document.getElementById("result").innerHTML=html;
+}
+
+// ===== Products =====
+function generateMega(){ showScan(()=>display(randomNumbers(6,45))); }
+function generatePower(){ showScan(()=>display(randomNumbers(6,55))); }
+function generateMax3D(){ showScan(()=>display([Math.floor(Math.random()*1000).toString().padStart(3,'0')])); }
+function generateMax3DPro(){
+    showScan(()=>{
+        display([
+            Math.floor(Math.random()*1000).toString().padStart(3,'0'),
+            Math.floor(Math.random()*1000).toString().padStart(3,'0')
+        ]);
+    });
+}
+function generateKeno(){ showScan(()=>display(randomNumbers(10,80))); }
+
+// ===== Birth =====
 function generateBirth(){
-let dob=document.getElementById('dob').value;
-if(!dob){alert("Vui lòng nhập ngày sinh");return;}
-let nums=dob.replaceAll("-","").split("").map(n=>parseInt(n));
-let result=[];
-nums.forEach(n=>{
-let val=(n%9)+1;
-if(!result.includes(val)) result.push(val);
-});
-while(result.length<6){
-let add=Math.floor(Math.random()*9)+1;
-if(!result.includes(add)) result.push(add);
-}
-render(result.slice(0,6).sort((a,b)=>a-b));
+    let base=parseInt(day.value)+parseInt(month.value)+parseInt(year.value);
+    showScan(()=>{
+        let nums=[];
+        for(let i=0;i<6;i++){
+            let num=((base+i*7)%45);
+            if(num===0) num=45;
+            if(!nums.includes(num)) nums.push(num);
+        }
+        display(nums.sort((a,b)=>a-b));
+    });
 }
 
-function generateHot(){
-render([3,7,18,25,32,44]);
-}
-
-function generatePopular(){
-render([5,12,19,28,36,41]);
-}
-
-function generateAI(){
-render([8,16,23,29,37,52]);
-}
+// ===== AI sets =====
+function hotNumbers(){ showScan(()=>display([7,14,23,32,41,45])); }
+function frequentNumbers(){ showScan(()=>display([3,9,18,27,36,44])); }
+function highChance(){ showScan(()=>display([5,12,19,28,34,42])); }
+function popularChoice(){ showScan(()=>display([1,8,16,24,35,43])); }
 
 </script>
 
