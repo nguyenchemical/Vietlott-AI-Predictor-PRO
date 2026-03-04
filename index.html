@@ -3,7 +3,15 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Vietlott AI Predictor Pro</title>
+
+<title>Dự Đoán Vietlott AI Pro</title>
+
+<!-- ===== APP ICON ===== -->
+<link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
+<link rel="icon" type="image/png" sizes="512x512" href="icon-512.png">
+<link rel="apple-touch-icon" sizes="512x512" href="icon-512.png">
+<meta name="theme-color" content="#f5b942">
+<!-- ====================== -->
 
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600&family=Poppins:wght@400;600&display=swap" rel="stylesheet">
 
@@ -100,10 +108,10 @@ select{
 <body>
 
 <div class="container">
-    <div class="badge">PRO AI Edition</div>
-    <h1>Vietlott AI Predictor</h1>
+    <div class="badge">PHIÊN BẢN AI PRO</div>
+    <h1>Dự Đoán Vietlott AI</h1>
 
-    <button onclick="toggleDark()">🌙 Dark Mode</button>
+    <button onclick="toggleDark()">🌙 Chế độ tối</button>
     <button onclick="toggleSound()">🔊 Âm thanh</button>
 
     <hr>
@@ -142,7 +150,7 @@ select{
 
 <script>
 
-/* ========= ULTRA SOUND FIX (WEB AUDIO) ========= */
+/* ===== GIỮ NGUYÊN TOÀN BỘ LOGIC ===== */
 
 let audioCtx;
 let soundEnabled = true;
@@ -156,18 +164,13 @@ function initAudio(){
 function playClick(){
     if(!soundEnabled) return;
     if(!audioCtx) initAudio();
-
     const osc = audioCtx.createOscillator();
     const gain = audioCtx.createGain();
-
     osc.type="sine";
     osc.frequency.value=800;
-
     osc.connect(gain);
     gain.connect(audioCtx.destination);
-
     gain.gain.setValueAtTime(0.25,audioCtx.currentTime);
-
     osc.start();
     osc.stop(audioCtx.currentTime+0.05);
 }
@@ -175,61 +178,42 @@ function playClick(){
 function playResult(){
     if(!soundEnabled) return;
     if(!audioCtx) initAudio();
-
     const osc=audioCtx.createOscillator();
     const gain=audioCtx.createGain();
-
     osc.type="triangle";
     osc.frequency.value=500;
-
     osc.connect(gain);
     gain.connect(audioCtx.destination);
-
     gain.gain.setValueAtTime(0.3,audioCtx.currentTime);
-
     osc.start();
     osc.stop(audioCtx.currentTime+0.08);
-
     setTimeout(()=>{
         const osc2=audioCtx.createOscillator();
         const gain2=audioCtx.createGain();
-
         osc2.type="triangle";
         osc2.frequency.value=900;
-
         osc2.connect(gain2);
         gain2.connect(audioCtx.destination);
-
         gain2.gain.setValueAtTime(0.3,audioCtx.currentTime);
-
         osc2.start();
         osc2.stop(audioCtx.currentTime+0.08);
     },80);
 }
 
-function toggleSound(){
-    soundEnabled=!soundEnabled;
-}
+function toggleSound(){ soundEnabled=!soundEnabled; }
 
 document.addEventListener("touchstart",initAudio,{once:true});
 document.addEventListener("click",initAudio,{once:true});
 
-/* ===== CÁC HÀM CŨ GIỮ NGUYÊN ===== */
-
 function vibratePhone(){
-    if(navigator.vibrate){
-        navigator.vibrate(200);
-    }
+    if(navigator.vibrate){ navigator.vibrate(200); }
 }
 
 for(let i=1;i<=31;i++) day.innerHTML+=`<option value="${i}">${i}</option>`;
 for(let i=1;i<=12;i++) month.innerHTML+=`<option value="${i}">${i}</option>`;
 for(let i=1950;i<=2025;i++) year.innerHTML+=`<option value="${i}">${i}</option>`;
 
-function toggleDark(){
-    document.body.classList.toggle("dark");
-    playClick();
-}
+function toggleDark(){ document.body.classList.toggle("dark"); playClick(); }
 
 function randomNumbers(count,max){
     let arr=[];
@@ -242,28 +226,22 @@ function randomNumbers(count,max){
 
 function smartAI(count,max){
     let pool=[];
-    for(let i=1;i<=max;i++){
-        pool.push({number:i,weight:Math.random()});
-    }
+    for(let i=1;i<=max;i++){ pool.push({number:i,weight:Math.random()}); }
     pool.sort((a,b)=>b.weight-a.weight);
     return pool.slice(0,count).map(x=>x.number).sort((a,b)=>a-b);
 }
 
 function display(numbers){
     let html="";
-    numbers.forEach(n=>{
-        html+=`<div class="number-ball">${n}</div>`;
-    });
+    numbers.forEach(n=>{ html+=`<div class="number-ball">${n}</div>`; });
     result.innerHTML=html;
 }
 
 function showScan(callback){
     result.innerHTML="";
     scanArea.innerHTML="<div class='scan'>🤖 AI đang quét dữ liệu...</div>";
-
     playClick();
     vibratePhone();
-
     setTimeout(()=>{
         scanArea.innerHTML="";
         callback();
@@ -281,7 +259,6 @@ function generateSmartAI(){ showScan(()=>display(smartAI(6,45))); }
 function generateMax3D(){
     showScan(()=>display([Math.floor(Math.random()*1000).toString().padStart(3,'0')]));
 }
-
 function generateMax3DPro(){
     showScan(()=>display([
         Math.floor(Math.random()*1000).toString().padStart(3,'0'),
@@ -292,8 +269,7 @@ function generateMax3DPro(){
 function generateBirth(){
     let base=parseInt(day.value)+parseInt(month.value)+parseInt(year.value);
     showScan(()=>{
-        let nums=[];
-        let i=0;
+        let nums=[]; let i=0;
         while(nums.length<6){
             let num=((base+i*11)%45);
             if(num===0) num=45;
