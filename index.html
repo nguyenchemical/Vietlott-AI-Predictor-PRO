@@ -1,28 +1,29 @@
 <!DOCTYPE html>
 <html lang="vi">
 <head>
+
 <meta charset="UTF-8">
-<title>AI Vietlott Predictor PRO 13.0</title>
+<title>Vietlott AI Predictor PRO 15.0 ULTRA</title>
 
 <style>
 
 body{
-font-family:Arial;
-background:#111;
+background:#0a0a0a;
 color:white;
+font-family:Arial;
 text-align:center;
 padding:20px;
 }
 
 h1{
-color:gold;
+color:#ffd700;
 }
 
-button{
-background:gold;
+.tabs button{
+background:#ffd700;
 border:none;
-padding:12px 20px;
-margin:5px;
+padding:12px 18px;
+margin:4px;
 border-radius:8px;
 font-weight:bold;
 cursor:pointer;
@@ -35,23 +36,30 @@ cursor:pointer;
 }
 
 .result{
-margin-top:25px;
+margin-top:30px;
 }
 
 .ball{
-width:55px;
-height:55px;
-line-height:55px;
+width:60px;
+height:60px;
+line-height:60px;
 border-radius:50%;
-background:red;
+background:#ff2a2a;
 display:inline-block;
 margin:6px;
+font-size:22px;
 font-weight:bold;
-font-size:20px;
+animation:pop 0.4s;
 }
 
-.firework{
-font-size:40px;
+@keyframes pop{
+0%{transform:scale(0)}
+100%{transform:scale(1)}
+}
+
+.fireworks{
+font-size:35px;
+margin-top:10px;
 animation:boom 1s infinite;
 }
 
@@ -61,6 +69,13 @@ animation:boom 1s infinite;
 100%{transform:scale(1)}
 }
 
+.analysis{
+margin-top:20px;
+background:#1b1b1b;
+padding:15px;
+border-radius:10px;
+}
+
 .popup{
 display:none;
 position:fixed;
@@ -68,30 +83,37 @@ top:0;
 left:0;
 width:100%;
 height:100%;
-background:rgba(0,0,0,0.8);
+background:rgba(0,0,0,0.85);
 }
 
-.popup-content{
-background:#222;
+.popup-box{
+background:#1b1b1b;
 padding:20px;
-margin:100px auto;
-width:250px;
+margin:120px auto;
+width:260px;
 border-radius:10px;
 }
 
+input{
+padding:8px;
+margin:5px;
+width:80%;
+}
+
 </style>
+
 </head>
 
 <body>
 
-<h1>AI Vietlott Predictor PRO 13.0</h1>
+<h1>Vietlott AI Predictor PRO 15.0 ULTRA</h1>
 
-<div>
+<div class="tabs">
 
 <button onclick="predictMega()">Mega 6/45</button>
 <button onclick="predictPower()">Power 6/55</button>
-<button onclick="predictMax3D()">Max3D</button>
 <button onclick="predictKeno()">Keno</button>
+<button onclick="predictMax3D()">Max3D</button>
 
 <br>
 
@@ -99,153 +121,169 @@ border-radius:10px;
 
 </div>
 
-<div class="status" onclick="openVietlott()">
+<div class="status" onclick="openSite()">
 Đang kết nối thời gian thực Vietlott
 </div>
 
 <div class="result">
 
-<h2>Kết quả dự đoán</h2>
+<h2>Kết quả dự đoán AI</h2>
 
-<div id="balls"></div>
+<div id="numbers"></div>
 
 <div id="fire"></div>
 
 </div>
 
-<div class="result">
+<div class="analysis">
 
-<h3>AI Phân tích</h3>
+<h3>AI Phân tích dữ liệu</h3>
 
 <p>🔥 Số HOT: <span id="hot"></span></p>
-<p>📈 Hay ra nhiều: <span id="freq"></span></p>
-<p>⭐ Cơ hội cao: <span id="chance"></span></p>
+<p>❄️ Số lạnh: <span id="cold"></span></p>
+<p>📊 Tần suất cao: <span id="freq"></span></p>
 
 </div>
 
-<div class="popup" id="birthdayBox">
+<div class="popup" id="birth">
 
-<div class="popup-content">
+<div class="popup-box">
 
-<h3>Chọn ngày sinh</h3>
+<h3>Ngày sinh</h3>
 
-<input id="day" type="number" placeholder="Ngày"><br><br>
-<input id="month" type="number" placeholder="Tháng"><br><br>
-<input id="year" type="number" placeholder="Năm"><br><br>
+<input id="d" placeholder="Ngày"><br>
+<input id="m" placeholder="Tháng"><br>
+<input id="y" placeholder="Năm"><br>
 
-<button onclick="createBirthday()">Tạo số</button>
+<button onclick="generateBirthday()">Tạo số</button>
+
+</div>
 
 </div>
 
-</div>
+<audio id="sound">
+<source src="https://actions.google.com/sounds/v1/cartoon/clang_and_wobble.ogg">
+</audio>
 
 <script>
 
-function randomNumbers(count,max){
+function rand(count,max){
 
-let nums=[]
+let arr=[]
 
-while(nums.length<count){
+while(arr.length<count){
 
-let n=Math.floor(Math.random()*max)+1
+let n=Math.floor(Math.random()max)+1
 
-if(!nums.includes(n)) nums.push(n)
-
-}
-
-return nums.sort((a,b)=>a-b)
+if(!arr.includes(n)) arr.push(n)
 
 }
 
-function showBalls(nums){
+return arr.sort((a,b)=>a-b)
 
-let html=""
+}
 
-nums.forEach(n=>{
-html+=`<div class="ball">${n}</div>`
+function display(nums){
+
+let box=document.getElementById("numbers")
+
+box.innerHTML=""
+
+let sound=document.getElementById("sound")
+
+nums.forEach((n,i)=>{
+
+setTimeout(()=>{
+
+let b=document.createElement("div")
+
+b.className="ball"
+
+b.innerText=n
+
+box.appendChild(b)
+
+sound.play()
+
+},i400)
+
 })
 
-document.getElementById("balls").innerHTML=html
+setTimeout(()=>{
 
-document.getElementById("fire").innerHTML="🎆🎆🎆"
+document.getElementById("fire").innerHTML="🎆 🎆 🎆"
 
-aiAnalysis(nums)
+},nums.length400)
+
+ai(nums)
 
 }
 
 function predictMega(){
 
-let nums=randomNumbers(6,45)
-
-showBalls(nums)
+display(rand(6,45))
 
 }
 
 function predictPower(){
 
-let nums=randomNumbers(6,55)
-
-showBalls(nums)
-
-}
-
-function predictMax3D(){
-
-let nums=randomNumbers(3,9)
-
-showBalls(nums)
+display(rand(6,55))
 
 }
 
 function predictKeno(){
 
-let nums=randomNumbers(10,80)
-
-showBalls(nums)
+display(rand(10,80))
 
 }
 
-function aiAnalysis(nums){
+function predictMax3D(){
+
+display(rand(3,9))
+
+}
+
+function ai(nums){
 
 document.getElementById("hot").innerText=nums.slice(0,2)
 
-document.getElementById("freq").innerText=nums.slice(2,4)
+document.getElementById("cold").innerText=nums.slice(2,4)
 
-document.getElementById("chance").innerText=nums.slice(4)
+document.getElementById("freq").innerText=nums.slice(4)
 
 }
 
 function openBirthday(){
 
-document.getElementById("birthdayBox").style.display="block"
+document.getElementById("birth").style.display="block"
 
 }
 
-function createBirthday(){
+function generateBirthday(){
 
-let d=document.getElementById("day").value
-let m=document.getElementById("month").value
-let y=document.getElementById("year").value
+let d=Number(document.getElementById("d").value)
+let m=Number(document.getElementById("m").value)
+let y=Number(document.getElementById("y").value)
 
-let seed=(+d)+(+m)+(+y)
+let seed=d+m+y
 
 let nums=[]
 
 for(let i=0;i<6;i++){
 
-nums.push((seed+i*7)%45+1)
+nums.push((seed+i11)%45+1)
 
 }
 
-nums=[...new Set(nums)].sort((a,b)=>a-b)
+nums=[...new Set(nums)]
 
-showBalls(nums)
+display(nums)
 
-document.getElementById("birthdayBox").style.display="none"
+document.getElementById("birth").style.display="none"
 
 }
 
-function openVietlott(){
+function openSite(){
 
 window.open("https://vietlott.vn")
 
