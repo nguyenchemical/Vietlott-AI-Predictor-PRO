@@ -1,12 +1,14 @@
 <!DOCTYPE html>
 <html lang="vi">
+
 <head>
+
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>Vietlott AI Predictor PRO 9.0</title>
+<title>Vietlott AI Predictor PRO 11.0</title>
 
-<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600&family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
 
 <style>
 
@@ -19,142 +21,227 @@ text-align:center;
 }
 
 .container{
-max-width:650px;
+max-width:700px;
 margin:auto;
 padding:20px;
-}
-
-h1{
-font-family:'Playfair Display',serif;
-margin-top:5px;
 }
 
 .badge{
 background:gold;
 color:black;
-padding:6px 14px;
-border-radius:30px;
-display:inline-block;
+padding:6px 15px;
+border-radius:40px;
 font-weight:bold;
 }
 
 .status{
 margin-top:10px;
-cursor:pointer;
-font-size:14px;
 color:#00ff9c;
+cursor:pointer;
 }
 
-button{
-margin:6px;
-padding:12px 16px;
+.tabs button{
+margin:5px;
+padding:10px 15px;
 border:none;
 border-radius:40px;
 background:linear-gradient(45deg,#ffcc00,#ff9900);
-color:black;
 font-weight:bold;
 cursor:pointer;
 }
 
-button:hover{
-transform:scale(1.05);
+.section{
+display:none;
+margin-top:20px;
+}
+
+.section.active{
+display:block;
+}
+
+button{
+margin:5px;
+padding:10px 15px;
+border:none;
+border-radius:40px;
+background:linear-gradient(45deg,#ffcc00,#ff9900);
+font-weight:bold;
+cursor:pointer;
 }
 
 .number-ball{
+
 display:inline-block;
-width:52px;
-height:52px;
-line-height:52px;
+
+width:50px;
+
+height:50px;
+
+line-height:50px;
+
 border-radius:50%;
+
 background:gold;
+
 color:black;
+
 font-weight:bold;
+
 margin:6px;
+
 box-shadow:0 4px 12px rgba(0,0,0,0.4);
-font-size:18px;
+
 animation:pop 0.4s;
+
 }
 
 @keyframes pop{
+
 from{transform:scale(0)}
+
 to{transform:scale(1)}
+
 }
 
 .scan{
+
 font-weight:bold;
+
 color:#ffcc00;
+
 animation:blink 0.6s infinite alternate;
+
 }
 
 @keyframes blink{
+
 from{opacity:0.4}
+
 to{opacity:1}
+
 }
 
 .firework{
+
 position:fixed;
+
 top:50%;
+
 left:50%;
+
 font-size:40px;
-animation:boom 1.2s ease-out forwards;
+
+animation:boom 1.2s forwards;
+
 }
 
 @keyframes boom{
+
 0%{transform:scale(0)}
-80%{transform:scale(1.3)}
+
+70%{transform:scale(1.3)}
+
 100%{opacity:0}
+
 }
 
-select{
-padding:8px;
-margin:4px;
-border-radius:8px;
+canvas{
+
+max-width:100%;
+
+margin-top:20px;
+
 }
 
 </style>
+
 </head>
 
 <body>
 
 <div class="container">
 
-<div class="badge">AI PRO 9.0</div>
+<div class="badge">AI PRO 11.0</div>
 
 <h1>Vietlott AI Predictor</h1>
 
 <div class="status" onclick="openVietlott()">
-🟢 Đang kết nối dữ liệu realtime Vietlott.vn
+
+🟢 Đang kết nối thời gian thực Vietlott
+
 </div>
 
 <hr>
 
-<h3>🎯 Dự đoán số</h3>
+<div class="tabs">
 
-<button onclick="generateMega()">Mega 6/45</button>
-<button onclick="generatePower()">Power 6/55</button>
-<button onclick="generateAI()">🤖 AI Siêu Dự Đoán</button>
+<button onclick="tab('predict')">Dự đoán số</button>
 
-<hr>
+<button onclick="tab('analysis')">AI phân tích dữ liệu</button>
 
-<h3>🎂 Tạo theo ngày sinh</h3>
+<button onclick="tab('birth')">Tạo theo ngày sinh</button>
+
+</div>
+
+<div id="predict" class="section active">
+
+<h3>Dự đoán số Vietlott</h3>
+
+<button onclick="mega()">Mega 6/45</button>
+
+<button onclick="power()">Power 6/55</button>
+
+<button onclick="max3d()">Max 3D</button>
+
+<button onclick="max3dpro()">Max 3D Pro</button>
+
+<button onclick="keno()">Keno</button>
+
+<button onclick="lotto()">Lotto 5/35</button>
+
+<button onclick="bingo()">Bingo 18</button>
+
+<button onclick="ai()">🤖 AI siêu dự đoán</button>
+
+<button onclick="jackpot()">🏆 Dự đoán Jackpot</button>
+
+</div>
+
+<div id="analysis" class="section">
+
+<h3>AI phân tích dữ liệu</h3>
+
+<button onclick="hot()">🔥 Số HOT</button>
+
+<button onclick="cold()">❄️ Số lạnh</button>
+
+<button onclick="cycle()">📈 Chu kỳ</button>
+
+<button onclick="chance()">⭐ Xác suất cao</button>
+
+<button onclick="chart()">📊 Biểu đồ thống kê</button>
+
+<canvas id="chart"></canvas>
+
+</div>
+
+<div id="birth" class="section">
+
+<h3>Tạo theo ngày sinh</h3>
 
 <select id="day"></select>
+
 <select id="month"></select>
+
 <select id="year"></select>
 
 <br>
 
-<button onclick="generateBirth()">Tạo số</button>
+<button onclick="birth()">Tạo số</button>
 
-<hr>
+</div>
 
-<h3>📊 AI Phân tích dữ liệu</h3>
-
-<button onclick="hotNumbers()">🔥 Số HOT</button>
-<button onclick="coldNumbers()">❄️ Số lạnh</button>
-<button onclick="cycleNumbers()">📈 Chu kỳ</button>
-
-<div id="scanArea"></div>
+<div id="scan"></div>
 
 <div id="result"></div>
 
@@ -164,65 +251,34 @@ border-radius:8px;
 
 let audioCtx
 
-function initAudio(){
-if(!audioCtx){
-audioCtx=new (window.AudioContext||window.webkitAudioContext)()
-}
-}
+function sound(freq){
 
-function clickSound(){
-initAudio()
+audioCtx=new(window.AudioContext||window.webkitAudioContext)()
+
 let osc=audioCtx.createOscillator()
+
 let gain=audioCtx.createGain()
 
-osc.frequency.value=700
+osc.frequency.value=freq
+
 osc.connect(gain)
+
 gain.connect(audioCtx.destination)
 
 gain.gain.setValueAtTime(0.25,audioCtx.currentTime)
 
 osc.start()
-osc.stop(audioCtx.currentTime+0.05)
-}
 
-function resultSound(){
-
-initAudio()
-
-let osc=audioCtx.createOscillator()
-let gain=audioCtx.createGain()
-
-osc.frequency.value=500
-osc.connect(gain)
-gain.connect(audioCtx.destination)
-
-gain.gain.setValueAtTime(0.3,audioCtx.currentTime)
-
-osc.start()
-osc.stop(audioCtx.currentTime+0.1)
-
-setTimeout(()=>{
-
-let osc2=audioCtx.createOscillator()
-let gain2=audioCtx.createGain()
-
-osc2.frequency.value=900
-osc2.connect(gain2)
-gain2.connect(audioCtx.destination)
-
-gain2.gain.setValueAtTime(0.3,audioCtx.currentTime)
-
-osc2.start()
-osc2.stop(audioCtx.currentTime+0.1)
-
-},120)
+osc.stop(audioCtx.currentTime+0.08)
 
 }
 
 function vibrate(){
-if(navigator.vibrate){
+
+if(navigator.vibrate)
+
 navigator.vibrate(200)
-}
+
 }
 
 function fireworks(){
@@ -230,17 +286,24 @@ function fireworks(){
 let f=document.createElement("div")
 
 f.className="firework"
+
 f.innerHTML="🎆"
 
 document.body.appendChild(f)
 
-setTimeout(()=>{
-f.remove()
-},1200)
+setTimeout(()=>{f.remove()},1200)
 
 }
 
-function randomNumbers(count,max){
+function tab(id){
+
+document.querySelectorAll(".section").forEach(e=>e.classList.remove("active"))
+
+document.getElementById(id).classList.add("active")
+
+}
+
+function random(count,max){
 
 let arr=[]
 
@@ -256,36 +319,21 @@ return arr.sort((a,b)=>a-b)
 
 }
 
-function aiPredict(count,max){
-
-let weights=[]
-
-for(let i=1;i<=max;i++){
-
-weights.push({
-num:i,
-w:Math.random()*Math.random()
-})
-
-}
-
-weights.sort((a,b)=>b.w-a.w)
-
-return weights.slice(0,count).map(x=>x.num).sort((a,b)=>a-b)
-
-}
-
 function display(nums){
 
 let html=""
 
 nums.forEach(n=>{
+
 html+=`<div class="number-ball">${n}</div>`
+
 })
 
 result.innerHTML=html
 
-resultSound()
+sound(800)
+
+setTimeout(()=>sound(1000),100)
 
 fireworks()
 
@@ -295,15 +343,13 @@ function scan(callback){
 
 result.innerHTML=""
 
-scanArea.innerHTML="<div class='scan'>🤖 AI đang phân tích dữ liệu...</div>"
-
-clickSound()
+scan.innerHTML="<div class='scan'>🤖 AI đang phân tích dữ liệu...</div>"
 
 vibrate()
 
 setTimeout(()=>{
 
-scanArea.innerHTML=""
+scan.innerHTML=""
 
 callback()
 
@@ -311,54 +357,71 @@ callback()
 
 }
 
-function generateMega(){
-scan(()=>display(randomNumbers(6,45)))
-}
+function mega(){scan(()=>display(random(6,45)))}
 
-function generatePower(){
-scan(()=>display(randomNumbers(6,55)))
-}
+function power(){scan(()=>display(random(6,55)))}
 
-function generateAI(){
-scan(()=>display(aiPredict(6,45)))
-}
+function keno(){scan(()=>display(random(10,80)))}
 
-function hotNumbers(){
-scan(()=>display([7,14,22,31,39,45]))
-}
+function lotto(){scan(()=>display(random(5,35)))}
 
-function coldNumbers(){
-scan(()=>display([2,6,13,20,28,34]))
-}
+function bingo(){scan(()=>display(random(18,90)))}
 
-function cycleNumbers(){
-scan(()=>display([5,11,19,27,36,44]))
-}
+function ai(){scan(()=>display(random(6,45)))}
 
-function generateBirth(){
+function jackpot(){scan(()=>display(random(6,55)))}
+
+function max3d(){scan(()=>display([Math.floor(Math.random()*1000)]))}
+
+function max3dpro(){scan(()=>display([Math.floor(Math.random()*1000),Math.floor(Math.random()*1000)]))}
+
+function hot(){scan(()=>display([7,14,23,31,39,45]))}
+
+function cold(){scan(()=>display([3,6,12,20,28,34]))}
+
+function cycle(){scan(()=>display([5,11,19,27,36,44]))}
+
+function chance(){scan(()=>display([4,13,21,29,37,42]))}
+
+function birth(){
 
 let base=parseInt(day.value)+parseInt(month.value)+parseInt(year.value)
 
-scan(()=>{
-
 let nums=[]
+
 let i=0
 
 while(nums.length<6){
 
-let num=(base+i*9)%45
+let n=(base+i*7)%45
 
-if(num===0) num=45
+if(n==0)n=45
 
-if(!nums.includes(num)) nums.push(num)
+if(!nums.includes(n))nums.push(n)
 
 i++
 
 }
 
-display(nums.sort((a,b)=>a-b))
+scan(()=>display(nums))
 
-})
+}
+
+function chart(){
+
+let c=document.getElementById("chart")
+
+let ctx=c.getContext("2d")
+
+ctx.clearRect(0,0,c.width,c.height)
+
+for(let i=0;i<10;i++){
+
+let h=Math.random()*150
+
+ctx.fillRect(i*30+20,200-h,20,h)
+
+}
 
 }
 
@@ -368,19 +431,14 @@ window.open("https://vietlott.vn","_blank")
 
 }
 
-for(let i=1;i<=31;i++){
-day.innerHTML+=`<option>${i}</option>`
-}
+for(let i=1;i<=31;i++) day.innerHTML+=`<option>${i}</option>`
 
-for(let i=1;i<=12;i++){
-month.innerHTML+=`<option>${i}</option>`
-}
+for(let i=1;i<=12;i++) month.innerHTML+=`<option>${i}</option>`
 
-for(let i=1950;i<=2025;i++){
-year.innerHTML+=`<option>${i}</option>`
-}
+for(let i=1950;i<=2025;i++) year.innerHTML+=`<option>${i}</option>`
 
 </script>
 
 </body>
+
 </html>
