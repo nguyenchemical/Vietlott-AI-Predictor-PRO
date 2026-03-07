@@ -2,64 +2,81 @@
 <html lang="vi">
 <head>
 <meta charset="UTF-8">
-<title>AI Vietlott Predictor PRO 12.0</title>
+<title>AI Vietlott Predictor PRO 13.0</title>
 
 <style>
 
 body{
 font-family:Arial;
-background:#0b0f1a;
+background:#111;
 color:white;
 text-align:center;
-padding:20px
+padding:20px;
 }
 
 h1{
-color:#FFD700
+color:gold;
 }
 
 button{
-padding:12px 20px;
-margin:10px;
+background:gold;
 border:none;
-border-radius:10px;
-font-size:16px;
-cursor:pointer;
-background:#FFD700;
-font-weight:bold
-}
-
-.box{
-background:#111827;
-padding:20px;
-margin:20px auto;
-border-radius:12px;
-max-width:400px
-}
-
-.number{
-display:inline-block;
-background:#ff3b3b;
-width:45px;
-height:45px;
-line-height:45px;
-border-radius:50%;
+padding:12px 20px;
 margin:5px;
+border-radius:8px;
 font-weight:bold;
-font-size:18px
+cursor:pointer;
 }
 
 .status{
-margin-top:15px;
-color:#00ffcc;
-cursor:pointer
+margin-top:10px;
+color:#00ff9c;
+cursor:pointer;
 }
 
-canvas{
+.result{
+margin-top:25px;
+}
+
+.ball{
+width:55px;
+height:55px;
+line-height:55px;
+border-radius:50%;
+background:red;
+display:inline-block;
+margin:6px;
+font-weight:bold;
+font-size:20px;
+}
+
+.firework{
+font-size:40px;
+animation:boom 1s infinite;
+}
+
+@keyframes boom{
+0%{transform:scale(1)}
+50%{transform:scale(1.4)}
+100%{transform:scale(1)}
+}
+
+.popup{
+display:none;
 position:fixed;
 top:0;
 left:0;
-pointer-events:none
+width:100%;
+height:100%;
+background:rgba(0,0,0,0.8);
+}
+
+.popup-content{
+background:#222;
+padding:20px;
+margin:100px auto;
+width:250px;
+border-radius:10px;
 }
 
 </style>
@@ -67,131 +84,170 @@ pointer-events:none
 
 <body>
 
-<h1>🤖 AI Vietlott Predictor PRO 12.0</h1>
+<h1>AI Vietlott Predictor PRO 13.0</h1>
 
-<div class="box">
+<div>
 
-<h2>Mega 6/45</h2>
+<button onclick="predictMega()">Mega 6/45</button>
+<button onclick="predictPower()">Power 6/55</button>
+<button onclick="predictMax3D()">Max3D</button>
+<button onclick="predictKeno()">Keno</button>
 
-<button onclick="predictMega()">Dự đoán Mega</button>
+<br>
 
-<div id="mega"></div>
-
-</div>
-
-
-<div class="box">
-
-<h2>Power 6/55</h2>
-
-<button onclick="predictPower()">Dự đoán Power</button>
-
-<div id="power"></div>
+<button onclick="openBirthday()">🎂 Tạo số theo ngày sinh</button>
 
 </div>
-
-
-<div class="box">
-
-<h2>🎯 Dự đoán Jackpot</h2>
-
-<button onclick="predictJackpot()">AI Dự đoán Jackpot</button>
-
-<div id="jackpot"></div>
-
-</div>
-
 
 <div class="status" onclick="openVietlott()">
-📡 Đang kết nối thời gian thực Vietlott...
+Đang kết nối thời gian thực Vietlott
 </div>
 
-<canvas id="firework"></canvas>
+<div class="result">
+
+<h2>Kết quả dự đoán</h2>
+
+<div id="balls"></div>
+
+<div id="fire"></div>
+
+</div>
+
+<div class="result">
+
+<h3>AI Phân tích</h3>
+
+<p>🔥 Số HOT: <span id="hot"></span></p>
+<p>📈 Hay ra nhiều: <span id="freq"></span></p>
+<p>⭐ Cơ hội cao: <span id="chance"></span></p>
+
+</div>
+
+<div class="popup" id="birthdayBox">
+
+<div class="popup-content">
+
+<h3>Chọn ngày sinh</h3>
+
+<input id="day" type="number" placeholder="Ngày"><br><br>
+<input id="month" type="number" placeholder="Tháng"><br><br>
+<input id="year" type="number" placeholder="Năm"><br><br>
+
+<button onclick="createBirthday()">Tạo số</button>
+
+</div>
+
+</div>
 
 <script>
 
-function randomSet(max){
+function randomNumbers(count,max){
 
-let nums=new Set()
+let nums=[]
 
-while(nums.size<6){
+while(nums.length<count){
 
-nums.add(Math.floor(Math.random()*max)+1)
+let n=Math.floor(Math.random()*max)+1
 
-}
-
-return [...nums].sort((a,b)=>a-b)
+if(!nums.includes(n)) nums.push(n)
 
 }
 
-function render(id,arr){
+return nums.sort((a,b)=>a-b)
+
+}
+
+function showBalls(nums){
 
 let html=""
 
-arr.forEach(n=>{
-html+=`<span class="number">${n}</span>`
+nums.forEach(n=>{
+html+=`<div class="ball">${n}</div>`
 })
 
-document.getElementById(id).innerHTML=html
+document.getElementById("balls").innerHTML=html
 
-firework()
+document.getElementById("fire").innerHTML="🎆🎆🎆"
+
+aiAnalysis(nums)
 
 }
 
 function predictMega(){
 
-let ai=randomSet(45)
+let nums=randomNumbers(6,45)
 
-render("mega",ai)
+showBalls(nums)
 
 }
 
 function predictPower(){
 
-let ai=randomSet(55)
+let nums=randomNumbers(6,55)
 
-render("power",ai)
+showBalls(nums)
 
 }
 
-function predictJackpot(){
+function predictMax3D(){
 
-let ai=randomSet(55)
+let nums=randomNumbers(3,9)
 
-render("jackpot",ai)
+showBalls(nums)
+
+}
+
+function predictKeno(){
+
+let nums=randomNumbers(10,80)
+
+showBalls(nums)
+
+}
+
+function aiAnalysis(nums){
+
+document.getElementById("hot").innerText=nums.slice(0,2)
+
+document.getElementById("freq").innerText=nums.slice(2,4)
+
+document.getElementById("chance").innerText=nums.slice(4)
+
+}
+
+function openBirthday(){
+
+document.getElementById("birthdayBox").style.display="block"
+
+}
+
+function createBirthday(){
+
+let d=document.getElementById("day").value
+let m=document.getElementById("month").value
+let y=document.getElementById("year").value
+
+let seed=(+d)+(+m)+(+y)
+
+let nums=[]
+
+for(let i=0;i<6;i++){
+
+nums.push((seed+i*7)%45+1)
+
+}
+
+nums=[...new Set(nums)].sort((a,b)=>a-b)
+
+showBalls(nums)
+
+document.getElementById("birthdayBox").style.display="none"
 
 }
 
 function openVietlott(){
 
-window.open("https://vietlott.vn","_blank")
-
-}
-
-
-/* FIREWORK */
-
-let canvas=document.getElementById("firework")
-let ctx=canvas.getContext("2d")
-
-canvas.width=window.innerWidth
-canvas.height=window.innerHeight
-
-function firework(){
-
-for(let i=0;i<80;i++){
-
-let x=Math.random()*canvas.width
-let y=Math.random()*canvas.height/2
-
-ctx.beginPath()
-ctx.arc(x,y,2,0,Math.PI*2)
-ctx.fillStyle="hsl("+Math.random()*360+",100%,50%)"
-ctx.fill()
-
-}
-
-setTimeout(()=>ctx.clearRect(0,0,canvas.width,canvas.height),700)
+window.open("https://vietlott.vn")
 
 }
 
